@@ -1,0 +1,70 @@
+
+{% for mkey, month in months.items %}
+  <div id="{{mkey}}">
+    <p><b>{{month.header}}</b></p>
+    <table style='font-family:"Courier New"; text-align:right'>
+      <tr>
+        <th>sun</th>
+        <th>mon</th>
+        <th>tue</th>
+        <th>wed</th>
+        <th>thu</th>
+        <th>fri</th>
+        <th>sat</th>
+      </tr>
+      {% for mday in month.monthdays %}
+
+        {% if mday.1 == 6 %}
+          <tr>
+        {% endif %}
+
+        {% if mday.0 == 0 %}
+          <td></td>
+        {% else %}
+            {% if mday.2 == "today" %}
+              <td style="background-color:yellow; text-decoration-line:underline"><b>{{mday.0}}</b></td>
+            {% elif mday.2 == "passed" %}
+              <td style="background-color:cyan"><b>{{mday.0}}</b></td>
+            {% elif mday.2 == "to come" %}
+              <td style="background-color:red; color:white"><b>{{mday.0}}</b></td>
+            {% else %}
+              <td>{{mday.0}}</td>
+            {% endif %}
+        {% endif %}
+
+        {% if mday.1 == 5 %}
+          </tr>
+        {% endif %}
+
+      {% endfor %}
+      </tr>
+    </table>
+
+    <table >
+      {% for appointment in month.appointments %}
+        <tr>
+          {% if appointment.1 == "today" %}
+            <td style='font-family:"Courier New"; text-align:right; background-color:yellow; text-decoration-line:underline'><b>{{appointment.0.date.day}}:</b></td>
+          {% elif appointment.1 == "passed" %}
+            <td style='font-family:"Courier New"; text-align:right; background-color:cyan'><b>{{appointment.0.date.day}}:</b></td>
+          {% elif appointment.1 == "to come" %}
+            <td style='font-family:"Courier New"; text-align:right; background-color:red; color:white'><b>{{appointment.0.date.day}}:</b></td>
+          {% endif %}
+          <td>{{appointment.0.description}}</td>
+        </tr>
+      {% endfor %}
+    </table>
+    <p>-------------------------------------------</p>
+  </div>
+{% endfor %}
+
+<script>
+  window.onload = function () {
+      elm = document.getElementById("{{scrollto}}");
+      elm.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+          inline: "nearest"
+        });
+    };
+</script>
