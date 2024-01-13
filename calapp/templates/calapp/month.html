@@ -1,8 +1,8 @@
 
 {% for mkey, month in months.items %}
-  <div id="{{mkey}}">
+  <div id="{{mkey}}" class="month_div">
     <p><b>{{month.header}}</b></p>
-    <table style='font-family:"Courier New"; text-align:right'>
+    <table class="month_table">
       <tr>
         <th>sun</th>
         <th>mon</th>
@@ -22,11 +22,11 @@
           <td></td>
         {% else %}
             {% if mday.2 == "today" %}
-              <td style="background-color:yellow; text-decoration-line:underline"><b>{{mday.0}}</b></td>
+              <td class="today"><b>{{mday.0}}</b></td>
             {% elif mday.2 == "passed" %}
-              <td style="background-color:cyan"><b>{{mday.0}}</b></td>
+              <td class="passed"><b>{{mday.0}}</b></td>
             {% elif mday.2 == "to come" %}
-              <td style="background-color:red; color:white"><b>{{mday.0}}</b></td>
+              <td class="to_come"><b>{{mday.0}}</b></td>
             {% else %}
               <td>{{mday.0}}</td>
             {% endif %}
@@ -40,23 +40,24 @@
       </tr>
     </table>
 
-    <table >
+    <table class="appointments_table">
       {% for appointment in month.appointments %}
         <tr>
           {% if appointment.1 == "today" %}
-            <td style='font-family:"Courier New"; text-align:right; background-color:yellow; text-decoration-line:underline'><b>{{appointment.0.date.day}}:</b></td>
+            <td class="today" ><b>{{appointment.0.date.day}}:</b></td>
           {% elif appointment.1 == "passed" %}
-            <td style='font-family:"Courier New"; text-align:right; background-color:cyan'><b>{{appointment.0.date.day}}:</b></td>
+            <td class="passed" ><b>{{appointment.0.date.day}}:</b></td>
           {% elif appointment.1 == "to come" %}
-            <td style='font-family:"Courier New"; text-align:right; background-color:red; color:white'><b>{{appointment.0.date.day}}:</b></td>
+            <td class="to_come" ><b>{{appointment.0.date.day}}:</b></td>
           {% endif %}
           <td>{{appointment.0.description}}</td>
         </tr>
       {% endfor %}
     </table>
-    <p>-------------------------------------------</p>
   </div>
+  <p></p>
 {% endfor %}
+
 
 <script>
   window.onload = function () {
@@ -67,4 +68,55 @@
           inline: "nearest"
         });
     };
+  document.addEventListener('click', function(e) {
+      console.log(e.clientX);
+      console.log(e.clientY);
+      var elms = document.elementsFromPoint(e.clientX, e.clientY);
+      var yearmonth = parseInt(elms[2].id);
+      var year = parseInt(yearmonth / 100);
+      var month = parseInt(yearmonth % 100);
+      var day = parseInt(elms[0].innerText);
+      if (day) {
+        console.log("year: " + year + ", month: " + month + ", day: " + day);
+        window.alert("year: " + year + ", month: " + month + ", day: " + day);
+      }
+      else {
+        console.log("not a day");
+      }
+    });
 </script>
+
+
+<style>
+  .month_div {
+    background-color: lightblue;
+    border: 1px solid black;
+    display: inline-block;
+    padding: 20px 20px;
+  }
+  .month_table {
+    font-family:"Courier New";
+    text-align:right;
+    font-size: 1.0em;
+  }
+  .appointments_table {
+    font-size: 1.0em;
+  }
+  .today {
+    font-family:"Courier New";
+    text-align:right;
+    background-color:yellow;
+    text-decoration-line:underline;
+  }
+  .passed {
+    font-family:"Courier New";
+    text-align:right;
+    background-color:cyan
+  }
+  .to_come {
+    font-family:"Courier New";
+    text-align:right;
+    background-color:red;
+    color:white
+  }
+</style>
