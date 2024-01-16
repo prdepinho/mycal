@@ -1,10 +1,17 @@
 
-<form method="post">
-  {% csrf_token %}
-  <table>
-  {{ form.as_table }}
-  </table>
-  <input type="submit" value="Update"><br/>
-  <a href="/calapp/appointment_delete/{{id}}">Delete</a>
-  <a href="javascript:history.back()">Back</a>
-</form>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+
+<body>
+
+  <form method="post">
+    {% csrf_token %}
+    <table>
+    {{ form.as_table }}
+    </table>
+    <input type="submit" value="Update"><br/>
+    <a href="/calapp/appointment_delete/{{id}}">Delete</a>
+    <a href="javascript:history.back()">Back</a>
+  </form>
+</body>

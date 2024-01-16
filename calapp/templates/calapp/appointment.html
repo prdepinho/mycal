@@ -1,9 +1,15 @@
 
-<form action="/calapp/appointment" method="post">
-  {% csrf_token %}
-  <table>
-  {{ form.as_table }}
-  </table>
-  <input type="submit" value="Submit">
-  <a href="javascript:history.back()">Back</a>
-</form>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+
+<body>
+  <form action="/calapp/appointment" method="post">
+    {% csrf_token %}
+    <table>
+    {{ form.as_table }}
+    </table>
+    <input type="submit" value="Submit">
+    <a href="javascript:history.back()">Back</a>
+  </form>
+</body>
