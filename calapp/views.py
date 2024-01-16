@@ -16,10 +16,13 @@ import logging
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
+previous_previous_page = ''
 previous_page = ''
 def set_previous_page(request):
+    global previous_previous_page
     global previous_page
     if request.method == "GET":
+        previous_previous_page = previous_page
         previous_page = request.META.get('HTTP_REFERER', '/')
 
 
@@ -241,7 +244,7 @@ def appointment_delete(request, id):
         apt = Appointment.objects.get(pk=id)
         if request.method == "POST":
             apt.delete()
-            return redirect(previous_page)
+            return redirect(previous_previous_page)
         context = {}
         return render(request, 'calapp/appointment_delete.html', context)
     except Exception as e:
