@@ -127,5 +127,7 @@ CSRF_TRUSTED_ORIGINS = [
         'https://mycal-b31068be8442.herokuapp.com'
         ]
 
+LOGIN_REDIRECT_URL = '/calapp/'
+
 import django_on_heroku
 django_on_heroku.settings(locals())

@@ -1,4 +1,9 @@
 
+<p>
+  {{user.get_username}}
+  <a href="{% url 'logout' %}?next={{request.path}}">Logout</a><br/>
+</p>
+
 {% for mkey, month in months.items %}
   <div id="{{mkey}}" class="month_div">
     <p><b>{{month.header}}</b></p>
@@ -22,13 +27,13 @@
           <td></td>
         {% else %}
             {% if mday.2 == "today" %}
-              <td class="today"><b>{{mday.0}}</b></td>
+              <td id="apt_{{mday.3.id}}" class="today">{{mday.0}}</td>
             {% elif mday.2 == "passed" %}
-              <td class="passed"><b>{{mday.0}}</b></td>
+              <td id="apt_{{mday.3.id}}" class="passed">{{mday.0}}</td>
             {% elif mday.2 == "to come" %}
-              <td class="to_come"><b>{{mday.0}}</b></td>
+              <td id="apt_{{mday.3.id}}" class="to_come">{{mday.0}}</td>
             {% else %}
-              <td>{{mday.0}}</td>
+              <td id="apt_{{mday.3.id}}" class="day">{{mday.0}}</td>
             {% endif %}
         {% endif %}
 
@@ -44,13 +49,13 @@
       {% for appointment in month.appointments %}
         <tr>
           {% if appointment.1 == "today" %}
-            <td class="today" ><b>{{appointment.0.date.day}}:</b></td>
+            <td id="apt_{{appointment.0.id}}" class="today" >{{appointment.0.date.day}}:</td>
           {% elif appointment.1 == "passed" %}
-            <td class="passed" ><b>{{appointment.0.date.day}}:</b></td>
+            <td id="apt_{{appointment.0.id}}" class="passed" >{{appointment.0.date.day}}:</td>
           {% elif appointment.1 == "to come" %}
-            <td class="to_come" ><b>{{appointment.0.date.day}}:</b></td>
+            <td id="apt_{{appointment.0.id}}" class="to_come" >{{appointment.0.date.day}}:</td>
           {% endif %}
-          <td>{{appointment.0.description}}</td>
+          <td id="apt_{{appointment.0.id}}" class="description" >{{appointment.0.description}}</td>
         </tr>
       {% endfor %}
     </table>
@@ -61,28 +66,40 @@
 
 <script>
   window.onload = function () {
-      elm = document.getElementById("{{scrollto}}");
-      elm.scrollIntoView({
-          behavior: "smooth",
-          block: "start",
-          inline: "nearest"
-        });
+      {% if scrollto %}
+        elm = document.getElementById("{{scrollto}}");
+        elm.scrollIntoView({
+            behavior: "smooth",
+            block: "start",
+            inline: "nearest"
+          });
+      {% endif %}
     };
   document.addEventListener('click', function(e) {
-      console.log(e.clientX);
-      console.log(e.clientY);
       var elms = document.elementsFromPoint(e.clientX, e.clientY);
-      var yearmonth = parseInt(elms[2].id);
-      var year = parseInt(yearmonth / 100);
-      var month = parseInt(yearmonth % 100);
-      var day = parseInt(elms[0].innerText);
-      if (day) {
-        console.log("year: " + year + ", month: " + month + ", day: " + day);
-        window.alert("year: " + year + ", month: " + month + ", day: " + day);
-      }
-      else {
-        console.log("not a day");
-      }
+      if (elms[0].nodeName == "TD") {
+          var yearmonth = parseInt(elms[2].id);
+          var year = parseInt(yearmonth / 100);
+          var month = parseInt(yearmonth % 100);
+          var day = parseInt(elms[0].innerText);
+          var apt_id = 0;
+          console.log("id: " + elms[0].id);
+          if (elms[0].id.length > 4) {
+            apt_id = parseInt(elms[0].id.substring(4));
+            }
+          if (["day", "today", "passed", "to_come", "description"].includes(elms[0].className)) {
+              if (apt_id == 0) {
+                console.log("id: " + apt_id + ", year: " + year + ", month: " + month + ", day: " + day);
+                  document.location.href = "appointment/"+year+"/"+month+"/"+day;
+                }
+              else {
+                document.location.href = "appointment_update/"+apt_id;
+                }
+            }
+          else {
+              console.log("not a day");
+            }
+        }
     });
 </script>
 
@@ -103,17 +120,20 @@
     font-size: 1.0em;
   }
   .today {
+    font-weight: bold;
     font-family:"Courier New";
     text-align:right;
     background-color:yellow;
     text-decoration-line:underline;
   }
   .passed {
+    font-weight: bold;
     font-family:"Courier New";
     text-align:right;
     background-color:cyan
   }
   .to_come {
+    font-weight: bold;
     font-family:"Courier New";
     text-align:right;
     background-color:red;
