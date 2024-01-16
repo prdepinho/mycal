@@ -1,70 +1,78 @@
 
-<div class="container">
-<p>
-  {{user.get_username}}
-  <a href="{% url 'logout' %}?next={{request.path}}">Logout</a><br/>
-</p>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
 
-{% for mkey, month in months.items %}
-  <div id="{{mkey}}" class="month_div">
-    <p><b>{{month.header}}</b></p>
-    <table class="month_table">
-      <tr>
-        <th>sun</th>
-        <th>mon</th>
-        <th>tue</th>
-        <th>wed</th>
-        <th>thu</th>
-        <th>fri</th>
-        <th>sat</th>
-      </tr>
-      {% for mday in month.monthdays %}
+<body>
 
-        {% if mday.1 == 6 %}
-          <tr>
-        {% endif %}
+  <div class="container">
+  <p>
+    {{user.get_username}}
+    <a href="{% url 'logout' %}?next={{request.path}}">Logout</a><br/>
+  </p>
 
-        {% if mday.0 == 0 %}
-          <td></td>
-        {% else %}
-            {% if mday.2 == "today" %}
-              <td id="apt_{{mday.3.id}}" class="today">{{mday.0}}</td>
-            {% elif mday.2 == "passed" %}
-              <td id="apt_{{mday.3.id}}" class="passed">{{mday.0}}</td>
-            {% elif mday.2 == "to come" %}
-              <td id="apt_{{mday.3.id}}" class="to_come">{{mday.0}}</td>
-            {% else %}
-              <td id="apt_{{mday.3.id}}" class="day">{{mday.0}}</td>
-            {% endif %}
-        {% endif %}
-
-        {% if mday.1 == 5 %}
-          </tr>
-        {% endif %}
-
-      {% endfor %}
-      </tr>
-    </table>
-
-    <table class="appointments_table">
-      {% for appointment in month.appointments %}
+  {% for mkey, month in months.items %}
+    <div id="{{mkey}}" class="month_div">
+      <p><b>{{month.header}}</b></p>
+      <table class="month_table">
         <tr>
-          {% if appointment.1 == "today" %}
-            <td id="apt_{{appointment.0.id}}" class="today" >{{appointment.0.date.day}}:</td>
-          {% elif appointment.1 == "passed" %}
-            <td id="apt_{{appointment.0.id}}" class="passed" >{{appointment.0.date.day}}:</td>
-          {% elif appointment.1 == "to come" %}
-            <td id="apt_{{appointment.0.id}}" class="to_come" >{{appointment.0.date.day}}:</td>
-          {% endif %}
-          <td id="apt_{{appointment.0.id}}" class="description" >{{appointment.0.description}}</td>
+          <th>sun</th>
+          <th>mon</th>
+          <th>tue</th>
+          <th>wed</th>
+          <th>thu</th>
+          <th>fri</th>
+          <th>sat</th>
         </tr>
-      {% endfor %}
-    </table>
-  </div>
-  <p></p>
-{% endfor %}
-</div>
+        {% for mday in month.monthdays %}
 
+          {% if mday.1 == 6 %}
+            <tr>
+          {% endif %}
+
+          {% if mday.0 == 0 %}
+            <td></td>
+          {% else %}
+              {% if mday.2 == "today" %}
+                <td id="apt_{{mday.3.id}}" class="today">{{mday.0}}</td>
+              {% elif mday.2 == "passed" %}
+                <td id="apt_{{mday.3.id}}" class="passed">{{mday.0}}</td>
+              {% elif mday.2 == "to come" %}
+                <td id="apt_{{mday.3.id}}" class="to_come">{{mday.0}}</td>
+              {% else %}
+                <td id="apt_{{mday.3.id}}" class="day">{{mday.0}}</td>
+              {% endif %}
+          {% endif %}
+
+          {% if mday.1 == 5 %}
+            </tr>
+          {% endif %}
+
+        {% endfor %}
+        </tr>
+      </table>
+
+      <table class="appointments_table">
+        {% for appointment in month.appointments %}
+          <tr>
+            {% if appointment.1 == "today" %}
+              <td id="apt_{{appointment.0.id}}" class="today" >{{appointment.0.date.day}}:</td>
+            {% elif appointment.1 == "passed" %}
+              <td id="apt_{{appointment.0.id}}" class="passed" >{{appointment.0.date.day}}:</td>
+            {% elif appointment.1 == "to come" %}
+              <td id="apt_{{appointment.0.id}}" class="to_come" >{{appointment.0.date.day}}:</td>
+            {% endif %}
+            <td id="apt_{{appointment.0.id}}" class="description" >{{appointment.0.description}}</td>
+          </tr>
+        {% endfor %}
+      </table>
+    </div>
+    <p></p>
+  {% endfor %}
+  </div>
+
+
+</body>
 
 <script>
   window.onload = function () {
