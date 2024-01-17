@@ -6,6 +6,7 @@ from django.shortcuts import render
 from django.contrib.auth import logout
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.decorators import login_required
+from django.db.models import Q
 import datetime
 import calendar
 
@@ -53,6 +54,7 @@ def _draw_months(request, year, month, forward):
     months = {}
     start_month = month
     start_year = year
+    today = datetime.date.today()
 
     for i in range(forward + 1):
         if i > 0:
@@ -62,18 +64,31 @@ def _draw_months(request, year, month, forward):
             else:
                 month = month + 1
 
+        # for each month
         mid = year * 100 + month
         header = datetime.date(year, month, 1).strftime("%B, %Y")
 
-        start = datetime.date(year, month, 1)
+        start = datetime.date(year, month, 1)  # start of the current month
         end_month = month + 1 if month < 12 else 1
         end_year = year if end_month != 1 else year + 1
-        end = datetime.date(end_year, end_month, 1)
-        appointments = [[x, ""] for x in Appointment.objects.filter(owner=request.user.username).filter(date__range=[start, end]).order_by('date')]
+        end = datetime.date(end_year, end_month, 1)  # start of the next month
+        appointments = [[x, ""] for x in Appointment.objects.filter(
+            Q(owner=request.user.username)
+            & ( 
+                Q(date__range=[start, end]) 
+                | (
+                    Q(yearly=True) & Q(date__month=month)
+                )
+            )
+        ).order_by('date')]
+
         monthdays = [[x,y,"",None] for (x,y) in cal.itermonthdays2(year, month)]  # x is monthday, y is weekday
 
         for appointment in appointments:
-            if appointment[0].date <= datetime.date.today():
+            if appointment[0].yearly:
+                appointment[0].date = datetime.date(year, appointment[0].date.month, appointment[0].date.day)
+
+            if appointment[0].date <= today:
                 appointment[1] = "passed"
                 for mday in monthdays:
                     if mday[0] == appointment[0].date.day:
@@ -89,13 +104,14 @@ def _draw_months(request, year, month, forward):
                         break
 
         scrollto = None
-        if month == datetime.date.today().month and year == datetime.date.today().year:
+        if month == today.month and year == today.year:
             scrollto = mid
+            logger.debug(scrollto)
             for appointment in appointments:
-                if appointment[0].date.day == datetime.date.today().day:
+                if appointment[0].date.day == today.day:
                     appointment[1] = "today"
             for mday in monthdays:
-                if mday[0] == datetime.date.today().day:
+                if mday[0] == today.day:
                     mday[2] = "today"
                     break
 
