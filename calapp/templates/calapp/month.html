@@ -56,6 +56,9 @@
         </tr>
       </table>
 
+      {% if month.appointments %}
+      <hr>
+      {% endif %}
       <table class="appointments_table">
         {% for appointment in month.appointments %}
           <tr>
@@ -95,10 +98,10 @@
     };
   document.addEventListener('click', function(e) {
       var elms = document.elementsFromPoint(e.clientX, e.clientY);
-      // console.log(elms);
       if (elms[0].nodeName == "TD") {
+        var yearmonth = parseInt(elms[2].id);
+        document.cookie = "last_visited_month=" + yearmonth + "; path=/";
         if (elms[1].className == "month_table") {
-          var yearmonth = parseInt(elms[2].id);
           var year = parseInt(yearmonth / 100);
           var month = parseInt(yearmonth % 100);
           var day = parseInt(elms[0].innerText);
@@ -113,20 +116,7 @@
             document.location.href = "/calapp/appointment_update/"+apt_id;
           }
         }
-
-          // if (["day", "today", "passed", "passed_yearly", "to_come", "to_come_yearly", "description"].includes(elms[0].className)) {
-          //     if (apt_id == 0) {
-          //       console.log("id: " + apt_id + ", year: " + year + ", month: " + month + ", day: " + day);
-          //         document.location.href = "/calapp/appointment/"+year+"/"+month+"/"+day;
-          //       }
-          //     else {
-          //       document.location.href = "/calapp/appointment_update/"+apt_id;
-          //       }
-          //   }
-          // else {
-          //     console.log("not a day");
-          //   }
-        }
+      }
     });
 </script>
 

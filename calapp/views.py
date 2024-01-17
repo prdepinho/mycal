@@ -82,7 +82,7 @@ def _draw_months(request, year, month, forward):
                     Q(yearly=True) & Q(date__month=month)
                 )
             )
-        ).order_by('date')]
+        ).order_by('date__day')]
 
         monthdays = [[x,y,"",None] for (x,y) in cal.itermonthdays2(year, month)]  # x is monthday, y is weekday
 
@@ -182,7 +182,6 @@ def appointment_day(request, year, month, day):
                 return redirect(request.COOKIES.get('home_page', '/calapp'))
 
         response = render(request, "calapp/appointment.html", context={"form": form})
-        response.set_cookie('last_visited_month', '%d' % (year * 100 + month))
         return response
     except Exception as e:
         return HttpResponse("error: %s" % str(e))
@@ -203,7 +202,6 @@ def appointment_by_id(request, id):
         else:
             form = AppointmentForm(instance=apt)
             response = render(request, "calapp/appointment.html", context={"form": form})
-            response.set_cookie('last_visited_month', '%d' % (apt.date.year * 100 + apt.date.month))
             return response
     except Exception as e:
         return HttpResponse("error: %s" % str(e))
@@ -233,7 +231,6 @@ def appointment_detail(request, id):
         apt = Appointment.objects.get(pk=id)
         context = {'apt': apt}
         response = render(request, "calapp/appointment_detail.html", context)
-        response.set_cookie('last_visited_month', '%d' % (apt.date.year * 100 + apt.date.month))
         return response
     except Exception as e:
         return HttpResponse("error: %s" % str(e))
@@ -249,7 +246,6 @@ def appointment_update(request, id):
             return redirect(request.COOKIES.get('home_page', '/calapp'))
         context = {'form': form, 'id':id}
         response = render(request, "calapp/appointment_update.html", context)
-        response.set_cookie('last_visited_month', '%d' % (apt.date.year * 100 + apt.date.month))
         return response
     except Exception as e:
         return HttpResponse("error: %s" % str(e))
@@ -264,7 +260,6 @@ def appointment_delete(request, id):
             return redirect(request.COOKIES.get('home_page', '/calapp'))
         context = {}
         response = render(request, 'calapp/appointment_delete.html', context)
-        response.set_cookie('last_visited_month', '%d' % (apt.date.year * 100 + apt.date.month))
         return response
     except Exception as e:
         return HttpResponse("error: %s" % str(e))
