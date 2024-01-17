@@ -44,6 +44,12 @@ def register_user(request):
         return HttpResponse(str(e))
 
 
+def select(request):
+    try:
+        return render(request, 'calapp/select.html', {})
+    except Exception as e:
+        return HttpResponse(str(e))
+
 
 def _draw_months(request, year, month, forward):
     if month < 1 or month > 12:

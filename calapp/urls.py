@@ -7,6 +7,8 @@ urlpatterns = [
         path('accounts/register', views.register_user, name="register_user"),
         path('accounts/logout', views.logout_user, name="logout"),
 
+        path("select", views.select, name="select"),
+
         path('<int:year>', views.show_year, name="year"),
         path("<int:year>/<int:month>/<int:forward>", views.month, name="month"),
         path("appointment", views.appointment, name="appointment"),

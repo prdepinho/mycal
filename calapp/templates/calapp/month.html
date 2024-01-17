@@ -8,7 +8,8 @@
   <div class="container">
   <p>
     {{user.get_username}}
-    <a href="{% url 'logout' %}?next={{request.path}}">Logout</a><br/>
+    <a href="{% url 'logout' %}?next={{request.path}}">Logout</a>
+    <a href="{% url 'select' %}?next={{request.path}}">Select</a><br/>
   </p>
 
   {% for mkey, month in months.items %}

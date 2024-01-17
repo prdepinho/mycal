@@ -1,0 +1,75 @@
+
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+
+<body>
+
+  <form id="date_form" onsubmit="return submit_date_form()">
+
+    <table>
+      <tr>
+        <td> <label for="year_input">Year:</label> </td>
+        <td> <input type="number" id="year_date_input" onkeydown="handle_date_keys(event)"> </td>
+      </tr>
+      <tr>
+        <td> <label for="year_input">Month:</label> </td>
+        <td> <input type="number" id="month_date_input" onkeydown="handle_date_keys(event)"> </td>
+      </tr>
+      <tr>
+        <td> <label for="year_input">Forward:</label> </td>
+        <td> <input type="number" id="forward_date_input" onkeydown="handle_date_keys(event)"> </td>
+      </tr>
+      <tr>
+        <td> <button type="button" onclick="submit_date_form()">Submit</button> </td>
+      </tr>
+    </table>
+
+  </form>
+  <a href="javascript:history.back()">Back</a>
+
+</body>
+
+<script>
+  function submit_date_form() {
+      var year = document.getElementById('year_date_input').value;
+      var month = document.getElementById('month_date_input').value;
+      var forward = document.getElementById('forward_date_input').value;
+      if (!year && !month && !forward) {
+        window.location.href = "/calapp/";
+        }
+      else if (year && !month && !forward) {
+          window.location.href = "/calapp/" + year;
+        }
+      else if (year && month && forward) {
+          window.location.href = "/calapp/" + year + "/" + month + "/" + forward;
+        }
+    }
+  function handle_date_keys(event) {
+      if (event.key === 'Enter') {
+        console.log(event.key);
+        submit_date_form();
+        return;
+        }
+    }
+</script>
+
+<style>
+  body {
+    background-color: white;
+    color: black;
+  }
+  @media (prefers-color-scheme: dark) {
+    body {
+      background-color: #353535;
+      color: lightgrey;
+    }
+    input {
+      background-color: #202020;
+      color: lightgrey;
+    }
+    a {
+      color: lightblue;
+    }
+  }
+</style>
