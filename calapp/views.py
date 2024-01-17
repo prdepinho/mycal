@@ -44,6 +44,7 @@ def register_user(request):
         return HttpResponse(str(e))
 
 
+@login_required(login_url="/calapp/accounts/login")
 def select(request):
     try:
         return render(request, 'calapp/select.html', {})
