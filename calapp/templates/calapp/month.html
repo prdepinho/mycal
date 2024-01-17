@@ -37,8 +37,12 @@
                 <td id="apt_{{mday.3.id}}" class="today">{{mday.0}}</td>
               {% elif mday.2 == "passed" %}
                 <td id="apt_{{mday.3.id}}" class="passed">{{mday.0}}</td>
+              {% elif mday.2 == "passed yearly" %}
+                <td id="apt_{{mday.3.id}}" class="passed_yearly">{{mday.0}}</td>
               {% elif mday.2 == "to come" %}
                 <td id="apt_{{mday.3.id}}" class="to_come">{{mday.0}}</td>
+              {% elif mday.2 == "to come yearly" %}
+                <td id="apt_{{mday.3.id}}" class="to_come_yearly">{{mday.0}}</td>
               {% else %}
                 <td id="apt_{{mday.3.id}}" class="day">{{mday.0}}</td>
               {% endif %}
@@ -59,8 +63,12 @@
               <td id="apt_{{appointment.0.id}}" class="today" >{{appointment.0.date.day}}:</td>
             {% elif appointment.1 == "passed" %}
               <td id="apt_{{appointment.0.id}}" class="passed" >{{appointment.0.date.day}}:</td>
+            {% elif appointment.1 == "passed yearly" %}
+              <td id="apt_{{appointment.0.id}}" class="passed_yearly" >{{appointment.0.date.day}}:</td>
             {% elif appointment.1 == "to come" %}
               <td id="apt_{{appointment.0.id}}" class="to_come" >{{appointment.0.date.day}}:</td>
+            {% elif appointment.1 == "to come yearly" %}
+              <td id="apt_{{appointment.0.id}}" class="to_come_yearly" >{{appointment.0.date.day}}:</td>
             {% endif %}
             <td id="apt_{{appointment.0.id}}" class="description" >{{appointment.0.description}}</td>
           </tr>
@@ -97,7 +105,7 @@
           if (elms[0].id.length > 4) {
             apt_id = parseInt(elms[0].id.substring(4));
             }
-          if (["day", "today", "passed", "to_come", "description"].includes(elms[0].className)) {
+          if (["day", "today", "passed", "passed_yearly", "to_come", "to_come_yearly", "description"].includes(elms[0].className)) {
               if (apt_id == 0) {
                 console.log("id: " + apt_id + ", year: " + year + ", month: " + month + ", day: " + day);
                   document.location.href = "/calapp/appointment/"+year+"/"+month+"/"+day;
@@ -120,7 +128,7 @@
     color: black;
   }
   .month_div {
-    background-color: lightblue;
+    background-color: #b8cedd;
     color: black;
     border: 1px solid black;
     display: inline-block;
@@ -147,14 +155,27 @@
     font-weight: bold;
     font-family:"Courier New";
     text-align:right;
-    background-color:lightcyan
+    background-color:#6afff8;
   }
   .to_come {
     font-weight: bold;
     font-family:"Courier New";
     text-align:right;
-    background-color:red;
-    color:white
+    background-color:#db0000;
+    color:white;
+  }
+  .passed_yearly {
+    font-weight: bold;
+    font-family:"Courier New";
+    text-align:right;
+    background-color:#c6f9f7;
+  }
+  .to_come_yearly {
+    font-weight: bold;
+    font-family:"Courier New";
+    text-align:right;
+    background-color:#ff6c6c;
+    color:white;
   }
   @media (prefers-color-scheme: dark) {
     body {
