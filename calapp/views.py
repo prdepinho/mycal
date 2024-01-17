@@ -69,9 +69,8 @@ def _draw_months(request, year, month, forward):
         header = datetime.date(year, month, 1).strftime("%B, %Y")
 
         start = datetime.date(year, month, 1)  # start of the current month
-        end_month = month + 1 if month < 12 else 1
-        end_year = year if end_month != 1 else year + 1
-        end = datetime.date(end_year, end_month, 1)  # start of the next month
+        _, end_day = calendar.monthrange(year, month)
+        end = datetime.date(year, month, end_day)  # end of month
         appointments = [[x, ""] for x in Appointment.objects.filter(
             Q(owner=request.user.username)
             & ( 
@@ -94,6 +93,7 @@ def _draw_months(request, year, month, forward):
                     if mday[0] == appointment[0].date.day:
                         mday[2] = "passed"
                         mday[3] = appointment[0]
+                        logger.debug('apt - %d: %s' % (mday[0], str(appointment[0])))
                         break
             else:
                 appointment[1] = "to come"
