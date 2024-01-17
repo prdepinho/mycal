@@ -100,10 +100,10 @@
           if (["day", "today", "passed", "to_come", "description"].includes(elms[0].className)) {
               if (apt_id == 0) {
                 console.log("id: " + apt_id + ", year: " + year + ", month: " + month + ", day: " + day);
-                  document.location.href = "appointment/"+year+"/"+month+"/"+day;
+                  document.location.href = "/calapp/appointment/"+year+"/"+month+"/"+day;
                 }
               else {
-                document.location.href = "appointment_update/"+apt_id;
+                document.location.href = "/calapp/appointment_update/"+apt_id;
                 }
             }
           else {
@@ -115,8 +115,13 @@
 
 
 <style>
+  body {
+    background-color: white;
+    color: black;
+  }
   .month_div {
     background-color: lightblue;
+    color: black;
     border: 1px solid black;
     display: inline-block;
     padding: 20px 20px;
@@ -125,9 +130,11 @@
     font-family:"Courier New";
     text-align:right;
     font-size: 1.0em;
+    color: black;
   }
   .appointments_table {
     font-size: 1.0em;
+    color: black;
   }
   .today {
     font-weight: bold;
@@ -140,7 +147,7 @@
     font-weight: bold;
     font-family:"Courier New";
     text-align:right;
-    background-color:cyan
+    background-color:lightcyan
   }
   .to_come {
     font-weight: bold;
@@ -148,5 +155,18 @@
     text-align:right;
     background-color:red;
     color:white
+  }
+  @media (prefers-color-scheme: dark) {
+    body {
+      background-color: #353535;
+      color: lightgrey;
+    }
+    input {
+      background-color: #202020;
+      color: lightgrey;
+    }
+    a {
+      color: lightblue;
+    }
   }
 </style>
