@@ -94,15 +94,17 @@ def _draw_months(request, year, month, forward):
                 appointment[1] = "passed yearly" if appointment[0].yearly else "passed"
                 for mday in monthdays:
                     if mday[0] == appointment[0].date.day:
-                        mday[2] = "passed yearly" if appointment[0].yearly else "passed"
-                        mday[3] = appointment[0]
+                        if mday[2] != "passed":
+                            mday[2] = "passed yearly" if appointment[0].yearly else "passed"
+                            mday[3] = appointment[0]
                         break
             else:
                 appointment[1] = "to come yearly" if appointment[0].yearly else "to come"
                 for mday in monthdays:
                     if mday[0] == appointment[0].date.day:
-                        mday[2] = "to come yearly" if appointment[0].yearly else "to come"
-                        mday[3] = appointment[0]
+                        if mday[2] != "to come":
+                            mday[2] = "to come yearly" if appointment[0].yearly else "to come"
+                            mday[3] = appointment[0]
                         break
 
         if month == today.month and year == today.year:

@@ -95,28 +95,37 @@
     };
   document.addEventListener('click', function(e) {
       var elms = document.elementsFromPoint(e.clientX, e.clientY);
+      // console.log(elms);
       if (elms[0].nodeName == "TD") {
+        if (elms[1].className == "month_table") {
           var yearmonth = parseInt(elms[2].id);
           var year = parseInt(yearmonth / 100);
           var month = parseInt(yearmonth % 100);
           var day = parseInt(elms[0].innerText);
+          console.log(year + "/" + month + "/" + day);
+          document.location.href = "/calapp/appointment/"+year+"/"+month+"/"+day;
+        }
+        else if (elms[1].className == "appointments_table") {
           var apt_id = 0;
           console.log("id: " + elms[0].id);
           if (elms[0].id.length > 4) {
             apt_id = parseInt(elms[0].id.substring(4));
-            }
-          if (["day", "today", "passed", "passed_yearly", "to_come", "to_come_yearly", "description"].includes(elms[0].className)) {
-              if (apt_id == 0) {
-                console.log("id: " + apt_id + ", year: " + year + ", month: " + month + ", day: " + day);
-                  document.location.href = "/calapp/appointment/"+year+"/"+month+"/"+day;
-                }
-              else {
-                document.location.href = "/calapp/appointment_update/"+apt_id;
-                }
-            }
-          else {
-              console.log("not a day");
-            }
+            document.location.href = "/calapp/appointment_update/"+apt_id;
+          }
+        }
+
+          // if (["day", "today", "passed", "passed_yearly", "to_come", "to_come_yearly", "description"].includes(elms[0].className)) {
+          //     if (apt_id == 0) {
+          //       console.log("id: " + apt_id + ", year: " + year + ", month: " + month + ", day: " + day);
+          //         document.location.href = "/calapp/appointment/"+year+"/"+month+"/"+day;
+          //       }
+          //     else {
+          //       document.location.href = "/calapp/appointment_update/"+apt_id;
+          //       }
+          //   }
+          // else {
+          //     console.log("not a day");
+          //   }
         }
     });
 </script>
