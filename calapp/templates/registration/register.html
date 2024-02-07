@@ -1,6 +1,32 @@
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
 
-<form method="POST">
-  {% csrf_token %}
-  {{form.as_p}}
-  <button>Register</button>
-</form>
+
+<body>
+  <form method="POST">
+    {% csrf_token %}
+    {{form.as_p}}
+    <button>Register</button>
+  </form>
+</body>
+
+<style>
+  body {
+    background-color: white;
+    color: black;
+  }
+  @media (prefers-color-scheme: dark) {
+    body {
+      background-color: #353535;
+      color: lightgrey;
+    }
+    input {
+      background-color: #202020;
+      color: lightgrey;
+    }
+    a {
+      color: lightblue;
+    }
+  }
+</style>
