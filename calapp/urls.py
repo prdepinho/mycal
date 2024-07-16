@@ -28,5 +28,13 @@ urlpatterns = [
         path("timer_delete/<int:id>", views.timer_delete, name="timer_delete"),
         path("timer_update", views.timer_update, name="timer_update"),
 
+        # ---
+        path("tasks/", views.tasks_list, name="tasks_list"),
+        path("tasks/<int:id>", views.tasks_detail, name="tasks_detail"),
+        path("tasks_create", views.tasks_create, name="tasks_create"),
+        path("tasks_update", views.tasks_update, name="tasks_update"),
+        path("tasks_delete", views.tasks_delete, name="tasks_delete"),
+
+
 
         ]

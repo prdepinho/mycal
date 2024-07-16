@@ -11,7 +11,7 @@ import datetime
 import calendar
 import json
 
-from .models import Appointment, AppointmentForm, Timer
+from .models import Appointment, AppointmentForm, Timer, Task
 
 import logging
 
@@ -277,7 +277,7 @@ def appointment_delete(request, id):
 
 @login_required(login_url="/calapp/accounts/login")
 def timer_list(request):
-    timers = Timer.objects.filter(Q(owner=request.user.username)).order_by('updated')
+    timers = Timer.objects.filter(Q(owner=request.user.username)).order_by('updated').reverse()
     context = { 'timers': timers }
     return render(request, "timer/timer_list.html", context=context)
 
@@ -289,7 +289,7 @@ def timer_detail(request, id):
 
 @login_required(login_url="/calapp/accounts/login")
 def timer_create(request):
-    timer = Timer.objects.create(updated=datetime.date.today(), count=0, name='New timer',
+    timer = Timer.objects.create(updated=datetime.datetime.now(), count=0, name='New timer',
             owner=request.user.username)
     timer.save()
     return redirect('/calapp/timer')
@@ -310,9 +310,35 @@ def timer_update(request):
         timer = Timer.objects.get(pk=data['id'])
         timer.name = data['name']
         timer.count = data['count']
-        timer.updated = datetime.date.today()
+        timer.updated = datetime.datetime.now()
         timer.save()
         return HttpResponse(status=200)
     else:
         logger.debug('is not POST (%s)' % request.method)
         return HttpResponse('Method is not POST')
+
+
+# ---
+
+
+@login_required(login_url="/calapp/accounts/login")
+def tasks_list(request):
+    tasks = Task.objects.filter(Q(owner=request.user.username)).order_by('priority').reverse()
+    context = { 'tasks': tasks }
+    return render(request, "tasks/tasks_list.html", context=context)
+
+@login_required(login_url="/calapp/accounts/login")
+def tasks_detail(request):
+    pass
+
+@login_required(login_url="/calapp/accounts/login")
+def tasks_create(request):
+    pass
+
+@login_required(login_url="/calapp/accounts/login")
+def tasks_update(request):
+    pass
+
+@login_required(login_url="/calapp/accounts/login")
+def tasks_delete(request):
+    pass

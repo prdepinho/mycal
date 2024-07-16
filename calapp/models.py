@@ -28,7 +28,26 @@ class AppointmentForm(ModelForm):
 
 
 class Timer(models.Model):
-    updated = models.DateField("timer last updated")
+    updated = models.DateTimeField("timer last updated")
     count = models.IntegerField(default=0)
     name = models.CharField(max_length=256)
     owner = models.CharField(max_length=256)
+
+
+class Task(models.Model):
+    owner = models.CharField(max_length=256)
+    title = models.CharField(max_length=256)
+    created = models.DateField('creation date')
+    deadline = models.DateField('deadline')
+    priority = models.IntegerField(default=0)
+    done = models.BooleanField(default=False)
+    parent = models.ForeignKey('self', null=True, on_delete=models.CASCADE)
+
+class TaskModel(ModelForm):
+    model = Task
+    fields = '__all__'
+    widgets = {
+            'title': TextInput(attrs={'autofocus': True}),
+            'deadline': DateInput(attrs={'type':'date'}),
+            'owner': TextInput(attrs={'readonly': 'readonly'}),
+            }

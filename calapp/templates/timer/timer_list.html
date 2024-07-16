@@ -8,7 +8,9 @@
     <p>
       {{user.get_username}}
       <a href="{% url 'logout' %}?next={{request.path}}">Logout</a>
-      <a href="{% url 'default' %}?next={{request.path}}">Calendar</a><br/>
+      <a href="{% url 'default' %}?next={{request.path}}">Calendar</a>
+      <a href="{% url 'tasks_list' %}?next={{request.path}}">Tasks</a>
+      <br/>
       <a href="{% url 'timer_create' %}?next={{request.path}}">New Timer</a>
     </p>
     <p>Timer List</p>
@@ -69,17 +71,17 @@
     background-color: white;
     color: black;
   }
+  .timer_div {
+    background-color: #b8cedd;
+    color: black;
+    border: 1px solid black;
+    display: inline-block;
+    padding: 20px 20px;
+  }
   @media (prefers-color-scheme: dark) {
     body {
       background-color: #353535;
       color: lightgrey;
-    }
-    .timer_div {
-      background-color: #b8cedd;
-      color: black;
-      border: 1px solid black;
-      display: inline-block;
-      padding: 20px 20px;
     }
     .detail {
       display: inline-block;
@@ -87,21 +89,19 @@
     .delete {
       float: right;
     }
+    .timer_div {
+      background-color: #555555;
+      color: lightgrey;
+      border: 1px solid black;
+      display: inline-block;
+      padding: 2px 20px;
+    }
     input {
       background-color: #202020;
       color: lightgrey;
     }
     a {
       color: lightblue;
-    }
-    @media (prefers-color-scheme: dark) {
-      .timer_div {
-        background-color: #555555;
-        color: lightgrey;
-        border: 1px solid black;
-        display: inline-block;
-        padding: 2px 20px;
-      }
     }
   }
 </style>
