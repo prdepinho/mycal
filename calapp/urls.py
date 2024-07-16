@@ -19,4 +19,14 @@ urlpatterns = [
         path("appointment_detail/<int:id>", views.appointment_detail, name="appointment_detail"),
         path("appointment_update/<int:id>", views.appointment_update, name="appointment_update"),
         path("appointment_delete/<int:id>", views.appointment_delete, name="appointment_delete"),
+
+        # --- 
+
+        path("timer/", views.timer_list, name="timer_list"),
+        path("timer/<int:id>", views.timer_detail, name="timer_detail"),
+        path("timer_create/", views.timer_create, name="timer_create"),
+        path("timer_delete/<int:id>", views.timer_delete, name="timer_delete"),
+        path("timer_update/<int:id>/<str:name>/<int:count>", views.timer_update, name="timer_update"),
+
+
         ]

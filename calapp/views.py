@@ -10,7 +10,7 @@ from django.db.models import Q
 import datetime
 import calendar
 
-from .models import Appointment, AppointmentForm
+from .models import Appointment, AppointmentForm, Timer
 
 import logging
 
@@ -272,4 +272,39 @@ def appointment_delete(request, id):
         return HttpResponse("error: %s" % str(e))
 
 
+# ---
+
+@login_required(login_url="/calapp/accounts/login")
+def timer_list(request):
+    timers = Timer.objects.filter(Q(owner=request.user.username)).order_by('updated')
+    context = { 'timers': timers }
+    return render(request, "timer/timer_list.html", context=context)
+
+@login_required(login_url="/calapp/accounts/login")
+def timer_detail(request, id):
+    timer = Timer.objects.get(pk=id)
+    context = { 'timer': timer }
+    return render(request, "timer/timer_detail.html", context=context)
+
+@login_required(login_url="/calapp/accounts/login")
+def timer_create(request):
+    timer = Timer.objects.create(updated=datetime.date.today(), count=0, name='New timer',
+            owner=request.user.username)
+    timer.save()
+    return redirect('/calapp/timer')
+
+@login_required(login_url="/calapp/accounts/login")
+def timer_delete(request, id):
+    timer = Timer.objects.get(pk=id)
+    timer.delete()
+    return redirect('/calapp/timer')
+
+@login_required(login_url="/calapp/accounts/login")
+def timer_update(request, id, name, count):
+    timer = Timer.objects.get(pk=id)
+    timer.name = name
+    timer.count = count
+    timer.updated = datetime.date.today()
+    timer.save()
+    return redirect('/calapp/timer/' + str(id))
 

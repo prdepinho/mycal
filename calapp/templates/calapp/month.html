@@ -9,7 +9,8 @@
   <p>
     {{user.get_username}}
     <a href="{% url 'logout' %}?next={{request.path}}">Logout</a>
-    <a href="{% url 'select' %}?next={{request.path}}">Select</a><br/>
+    <a href="{% url 'timer_list' %}?next={{request.path}}">Timers</a><br/>
+    <a href="{% url 'select' %}?next={{request.path}}">Select</a>
   </p>
 
   {% for mkey, month in months.items %}

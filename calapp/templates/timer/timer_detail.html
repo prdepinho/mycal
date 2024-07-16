@@ -1,0 +1,111 @@
+
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+
+<body>
+  <p>Timer</p>
+  <p>
+    <input id="timername" value="{{timer.name}}" onkeydown="save_timer(event)"/>
+  </p>
+  <input id="timercount" hidden type="integer" value="{{timer.count}}" />
+  <input id=readable onkeydown="save_timer(event)" />
+  <p>
+    <button id="timerbutton">Start</button>
+  </p>
+  <a href="/calapp/timer">Back</a>
+</body>
+
+<script>
+  window.onload = function() {
+    var count = {{timer.count}};
+    var running = false;
+    document.getElementById('timercount').innerHTML = count + ' ';
+
+    readable_counter(count);
+
+
+    function loop() {
+      if (running) {
+        console.log('in the loop');
+        count += 1;
+        document.getElementById('timercount').value = count + ' ';
+        readable_counter(count);
+      }
+    }
+    setInterval(loop, 1000);
+
+    button = document.getElementById('timerbutton');
+    console.log(button);
+    button.addEventListener('click', function(event) {
+      if (!running) {
+        button.innerHTML = 'Stop';
+        running = true;
+      }
+      else {
+        button.innerHTML = 'Start';
+        running = false;
+        
+        var name = document.getElementById('timername').value;
+        document.location.href = "/calapp/timer_update/"+{{timer.id}}+"/"+name+"/"+count + ' ' ;
+      }
+    });
+  }
+
+  function readable_counter(count) {
+    var hour = 0;
+    var min = 0;
+    var sec = count;
+    hour = Math.floor(sec / 3600);
+    sec = sec % 3600;
+    min = Math.floor(sec / 60);
+    sec = sec % 60;
+    var readable = hour.toString().padStart(2, '0') + ':' + min.toString().padStart(2, '0') + ":" + sec.toString().padStart(2, '0');
+    document.getElementById('readable').value = readable;
+  }
+
+  function readable_to_secs() {
+    var fields = document.getElementById('readable').value.split(':');
+    var hour = Math.floor(fields[0]);
+    var min = Math.floor(fields[1]);
+    var sec = Math.floor(fields[2]);
+    hour = hour ? hour : 0;
+    min = min ? min : 0;
+    sec = sec ? sec : 0;
+    console.log("hour: " + hour);
+    console.log("min: " + min);
+    console.log("sec: " + sec);
+    var count = (hour * 3600) + (min * 60) + (sec);
+    console.log("count: " + count);
+    return count;
+  }
+
+  function save_timer(event) {
+    if (event.key === 'Enter') {
+      console.log('foo');
+      var name = document.getElementById('timername').value;
+      var count = readable_to_secs();
+      document.location.href = "/calapp/timer_update/"+{{timer.id}}+"/"+name+"/"+count + ' ' ;
+    }
+  }
+</script>
+
+<style>
+  body {
+    background-color: white;
+    color: black;
+  }
+  @media (prefers-color-scheme: dark) {
+    body {
+      background-color: #353535;
+      color: lightgrey;
+    }
+    input {
+      background-color: #202020;
+      color: lightgrey;
+    }
+    a {
+      color: lightblue;
+    }
+  }
+</style>

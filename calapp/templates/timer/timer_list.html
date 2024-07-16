@@ -1,0 +1,107 @@
+
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+
+<body>
+  <div class="container">
+    <p>
+      {{user.get_username}}
+      <a href="{% url 'logout' %}?next={{request.path}}">Logout</a>
+      <a href="{% url 'default' %}?next={{request.path}}">Calendar</a><br/>
+      <a href="{% url 'timer_create' %}?next={{request.path}}">New Timer</a>
+    </p>
+    <p>Timer List</p>
+
+    {% for timer in timers %}
+    <p>
+      <div class="timer_div">
+        <p id="timer_{{timer.id}}">{{timer.name}}: {{timer.count}}</p>
+        <a class="detail" href="/calapp/timer/{{timer.id}}">detail</a>
+        <a class="delete" href="/calapp/timer_delete/{{timer.id}}">delete</a>
+        <p/>
+      </div>
+    </p>
+    {% endfor %}
+  </div>
+
+</body>
+
+<script>
+
+  window.onload = function() {
+
+    {% for timer in timers %}
+      console.log("timer_{{timer.id}}");
+
+      var readable = "";
+      {
+        var hour = 0;
+        var min = 0;
+        var sec = {{timer.count}};
+        hour = Math.floor(sec / 3600);
+        sec = sec % 3600;
+        min = Math.floor(sec / 60);
+        sec = sec % 60;
+        readable = hour.toString().padStart(2, '0') + ':'
+          + min.toString().padStart(2, '0') + ":"
+          + sec.toString().padStart(2, '0');
+      }
+
+      document.getElementById("timer_{{timer.id}}").innerHTML = 
+        "{{timer.name}}: " + readable + ", updated: {{timer.updated}}";
+    {% endfor %}
+  }
+
+  function readable_counter(count) {
+    var hour = 0;
+    var min = 0;
+    var sec = count;
+    hour = Math.floor(sec / 3600);
+    sec = sec % 3600;
+    min = Math.floor(sec / 60);
+    document.getElementById('readable').innerHTML = hour + ':' + min;
+  }
+</script>
+
+<style>
+  body {
+    background-color: white;
+    color: black;
+  }
+  @media (prefers-color-scheme: dark) {
+    body {
+      background-color: #353535;
+      color: lightgrey;
+    }
+    .timer_div {
+      background-color: #b8cedd;
+      color: black;
+      border: 1px solid black;
+      display: inline-block;
+      padding: 20px 20px;
+    }
+    .detail {
+      display: inline-block;
+    }
+    .delete {
+      float: right;
+    }
+    input {
+      background-color: #202020;
+      color: lightgrey;
+    }
+    a {
+      color: lightblue;
+    }
+    @media (prefers-color-scheme: dark) {
+      .timer_div {
+        background-color: #555555;
+        color: lightgrey;
+        border: 1px solid black;
+        display: inline-block;
+        padding: 2px 20px;
+      }
+    }
+  }
+</style>

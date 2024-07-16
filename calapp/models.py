@@ -25,3 +25,10 @@ class AppointmentForm(ModelForm):
                 'date': DateInput(attrs={'type':'date'}),
                 'owner': TextInput(attrs={'readonly': 'readonly'}),
                 }
+
+
+class Timer(models.Model):
+    updated = models.DateField("timer last updated")
+    count = models.IntegerField(default=0)
+    name = models.CharField(max_length=256)
+    owner = models.CharField(max_length=256)
