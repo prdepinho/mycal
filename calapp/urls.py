@@ -26,7 +26,7 @@ urlpatterns = [
         path("timer/<int:id>", views.timer_detail, name="timer_detail"),
         path("timer_create/", views.timer_create, name="timer_create"),
         path("timer_delete/<int:id>", views.timer_delete, name="timer_delete"),
-        path("timer_update/<int:id>/<str:name>/<int:count>", views.timer_update, name="timer_update"),
+        path("timer_update", views.timer_update, name="timer_update"),
 
 
         ]

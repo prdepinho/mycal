@@ -6,10 +6,10 @@
 <body>
   <p>Timer</p>
   <p>
-    <input id="timername" value="{{timer.name}}" onkeydown="save_timer(event)"/>
+    <input id="timername" value="{{timer.name}}" onkeydown="click_save_timer(event)"/>
   </p>
   <input id="timercount" hidden type="integer" value="{{timer.count}}" />
-  <input id=readable onkeydown="save_timer(event)" />
+  <input id=readable onkeydown="click_save_timer(event)" />
   <p>
     <button id="timerbutton">Start</button>
   </p>
@@ -23,7 +23,6 @@
     document.getElementById('timercount').innerHTML = count + ' ';
 
     readable_counter(count);
-
 
     function loop() {
       if (running) {
@@ -45,11 +44,14 @@
       else {
         button.innerHTML = 'Start';
         running = false;
-        
-        var name = document.getElementById('timername').value;
-        document.location.href = "/calapp/timer_update/"+{{timer.id}}+"/"+name+"/"+count + ' ' ;
+        save_timer_post()
       }
     });
+  }
+
+  window.onbeforeunload = function() {
+    console.log("before unload");
+    save_timer_post();
   }
 
   function readable_counter(count) {
@@ -72,22 +74,31 @@
     hour = hour ? hour : 0;
     min = min ? min : 0;
     sec = sec ? sec : 0;
-    console.log("hour: " + hour);
-    console.log("min: " + min);
-    console.log("sec: " + sec);
     var count = (hour * 3600) + (min * 60) + (sec);
-    console.log("count: " + count);
     return count;
   }
 
-  function save_timer(event) {
+  function click_save_timer(event) {
     if (event.key === 'Enter') {
-      console.log('foo');
-      var name = document.getElementById('timername').value;
-      var count = readable_to_secs();
-      document.location.href = "/calapp/timer_update/"+{{timer.id}}+"/"+name+"/"+count + ' ' ;
+      save_timer_post();
     }
   }
+
+  function save_timer_post() {
+    var name = document.getElementById('timername').value;
+    var count = readable_to_secs();
+
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', "/calapp/timer_update", true);
+    xhr.setRequestHeader('X-CSRFToken', "{{csrf_token}}");
+    xhr.setRequestHeader('Content-Type', 'application/json');
+
+    xhr.onreadystatechange = function() {
+      console.log('XHR state: ' + xhr.readyState + ", status: " + xhr.status);
+    };
+    xhr.send(JSON.stringify({"id": {{timer.id}}, "name": name, "count": count}));
+  }
+
 </script>
 
 <style>

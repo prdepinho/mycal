@@ -9,6 +9,7 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 import datetime
 import calendar
+import json
 
 from .models import Appointment, AppointmentForm, Timer
 
@@ -299,12 +300,19 @@ def timer_delete(request, id):
     timer.delete()
     return redirect('/calapp/timer')
 
-@login_required(login_url="/calapp/accounts/login")
-def timer_update(request, id, name, count):
-    timer = Timer.objects.get(pk=id)
-    timer.name = name
-    timer.count = count
-    timer.updated = datetime.date.today()
-    timer.save()
-    return redirect('/calapp/timer/' + str(id))
 
+@login_required(login_url="/calapp/accounts/login")
+def timer_update(request):
+    logger.debug('timer_save')
+    if request.method == "POST":
+        logger.debug('is POST')
+        data = json.loads(request.body)
+        timer = Timer.objects.get(pk=data['id'])
+        timer.name = data['name']
+        timer.count = data['count']
+        timer.updated = datetime.date.today()
+        timer.save()
+        return HttpResponse(status=200)
+    else:
+        logger.debug('is not POST (%s)' % request.method)
+        return HttpResponse('Method is not POST')
