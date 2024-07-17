@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect, HttpResponseRedirect
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.template import loader
 from django.http import Http404
 from django.shortcuts import render
@@ -11,7 +11,7 @@ import datetime
 import calendar
 import json
 
-from .models import Appointment, AppointmentForm, Timer, Task
+from .models import Appointment, AppointmentForm, Timer, Task, TaskForm
 
 import logging
 
@@ -322,23 +322,85 @@ def timer_update(request):
 
 
 @login_required(login_url="/calapp/accounts/login")
-def tasks_list(request):
-    tasks = Task.objects.filter(Q(owner=request.user.username)).order_by('priority').reverse()
+def tasks_list(request, mode="all"):
+    if mode == "all":
+        tasks = Task.objects.filter(Q(owner=request.user.username)).order_by('priority').reverse()
+    elif mode == "done":
+        tasks = Task.objects.filter(Q(owner=request.user.username) & Q(done=True)).order_by('priority').reverse()
+    elif mode == "active":
+        tasks = Task.objects.filter(Q(owner=request.user.username) & Q(done=False)).order_by('priority').reverse()
+    else:
+        tasks = Task.objects.filter(Q(owner=request.user.username) & Q(done=False)).order_by('priority').reverse()
     context = { 'tasks': tasks }
     return render(request, "tasks/tasks_list.html", context=context)
 
 @login_required(login_url="/calapp/accounts/login")
-def tasks_detail(request):
+def tasks_detail(request, id):
     pass
+
+@login_required(login_url="/calapp/accounts/login")
+def tasks_get(request):
+    pass
+
 
 @login_required(login_url="/calapp/accounts/login")
 def tasks_create(request):
-    pass
+    if request.method == "POST":
+        task = Task.objects.create(
+                owner=request.user.username,
+                title="New Task",
+                created=datetime.date.today(),
+                deadline=datetime.date.today(),
+                priority=0,
+                done=False,
+                )
+        task.save()
+        return JsonResponse({"id": task.id}, status=200)
+    else:
+        return render(request, "tasks/tasks_detail.html", context={})
+
+@login_required(login_url="/calapp/accounts/login")
+def tasks_create_child(request):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        parent = Task.objects.get(pk=data['parent_id'])
+        if not parent:
+            return JsonResponse({}, status=404)
+        task = Task.objects.create(
+                owner=request.user.username,
+                title="New Task",
+                created=datetime.date.today(),
+                deadline=datetime.date.today(),
+                priority=0,
+                done=False,
+                parent=parent,
+                )
+        task.save()
+        return JsonResponse({"id": task.id}, status=200)
+    return JsonResponse({}, status=404)
 
 @login_required(login_url="/calapp/accounts/login")
 def tasks_update(request):
-    pass
+    if request.method == "POST":
+        data = json.loads(request.body)
+        task = Task.objects.get(pk=data['id'])
+        if data['title']:
+            task.title = data['title']
+        if data['deadline']:
+            task.deadline = datetime.datetime.strptime(data['deadline'], "%Y-%m-%d") if data['deadline'] != '' else task.deadline
+        if data['priority']:
+            task.priority = data['priority']
+        if data['done']:
+            task.done = data['done']
+        task.save()
+        return JsonResponse({}, status=200)
+    return JsonResponse({}, status=404)
 
 @login_required(login_url="/calapp/accounts/login")
 def tasks_delete(request):
-    pass
+    if request.method == "POST":
+        data = json.loads(request.body)
+        task = Task.objects.get(pk=data['id'])
+        task.delete()
+        return JsonResponse({}, status=200)
+    return JsonResponse({}, status=404)

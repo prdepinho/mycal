@@ -43,7 +43,7 @@ class Task(models.Model):
     done = models.BooleanField(default=False)
     parent = models.ForeignKey('self', null=True, on_delete=models.CASCADE)
 
-class TaskModel(ModelForm):
+class TaskForm(ModelForm):
     model = Task
     fields = '__all__'
     widgets = {

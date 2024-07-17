@@ -15,20 +15,184 @@
     </p>
     <p>Tasks List</p>
 
-    {% for task in tasks %}
     <p>
-      <div class="task_div">
-        <p id="task_{{task.id}}">{{task.title}}</p>
-        <p/>
-      </div>
+      <button type="button" onclick="new_task()">New Task</button>
     </p>
-    {% endfor %}
+
+    <div id="all_tasks_div">
+    </div>
+
   </div>
 
 </body>
 
 <script>
   window.onload = function() {
+    {% for task in tasks %}
+      {% if task.parent == nil %}
+      var all_tasks = document.getElementById("all_tasks_div");
+      all_tasks.append(new_task_tag({{task.id}}));
+      document.getElementById("title_input_{{task.id}}").value = "{{task.title}}";
+      document.getElementById("priority_input_{{task.id}}").value = {{task.priority}};
+      document.getElementById("deadline_input_{{task.id}}").value = 
+        "{{task.deadline.year}}".padStart(4, 0) +"-"+
+        "{{task.deadline.month}}".padStart(2, 0) +"-"+
+        "{{task.deadline.day}}".padStart(2, 0);
+      document.getElementById("done_input_{{task.id}}").checked = "{{task.done}}" == "True";
+      {% endif %}
+    {% endfor %}
+
+    {% for task in tasks %}
+      {% if task.parent != nil %}
+      var parent = document.getElementById("children_{{task.parent.id}}");
+      parent.append(new_child_task_tag({{task.id}}));
+      document.getElementById("title_input_{{task.id}}").value = "{{task.title}}";
+      document.getElementById("priority_input_{{task.id}}").value = {{task.priority}};
+      document.getElementById("done_input_{{task.id}}").checked = "{{task.done}}" == "True";
+      {% endif %}
+    {% endfor %}
+  }
+
+  function new_task_tag(id) {
+    var tag = document.createElement('p');
+    tag.id = "task_" + id;
+    tag.innerHTML = `
+            <div class="task_div">
+              <table>
+                <tr>
+                  <td> <input type="checkbox" id="done_input_${id}"> </td>
+                  <td> 
+                    <label>Title: </label>
+                    <input class="title_input" id="title_input_${id}"> 
+                  </td>
+                </tr>
+                <tr>
+                </tr>
+                <tr>
+                  <td></td>
+                  <td> 
+                    <label>Priority:</label> 
+                    <input class="priority_input" type="number" id="priority_input_${id}">
+                    <label>Deadline:</label>
+                    <input class="deadline_input" type="date" id="deadline_input_${id}">
+                  </td>
+                </tr>
+                <tr>
+                  <td></td>
+                  <td>
+                    <button id="update_button" onclick="update_task(${id})">Update</button>
+                    <button id="delete_button" onclick="delete_task(${id})">Delete</button>
+                  </td>
+                </tr>
+                <tr>
+                  <td></td>
+                  <td> <label>Children:</label> </td>
+                  <td></td>
+                </tr>
+                <tr>
+                  <td></td>
+                  <td>
+                    <button id="new_child_button" onclick="new_child_task(${id})">New Child</button>
+                  </td>
+                </tr>
+                <tr>
+                  <td></td>
+                  <td>
+                  <p id="children_${id}">
+                  </p>
+                  </td>
+                  <td></td>
+                </tr>
+              </table>
+            </div>
+    `;
+    return tag;
+  }
+
+  function new_child_task_tag(id) {
+    var tag = document.createElement('p');
+    tag.id = "task_" + id;
+    tag.innerHTML = `
+            <div class="child_div">
+              <table>
+                <tr>
+                  <td> <input type="checkbox" id="done_input_${id}"> </td>
+                  <td> 
+                    <label>Title: </label>
+                    <input class="title_input" id="title_input_${id}"> 
+                    <label>Priority:</label> 
+                    <input class="priority_input" type="number" id="priority_input_${id}">
+                    <button id="update_button" onclick="update_task(${id})">Update</button>
+                    <button id="delete_button" onclick="delete_task(${id})">Delete</button>
+                  </td>
+                </tr>
+              </table>
+            </div>
+    `;
+    return tag;
+  }
+
+  function new_task() {
+    send("POST", "/calapp/tasks_create", {}, function(request) {
+      if (request.status == 200) {
+        var response = JSON.parse(request.responseText);
+        console.log(response);
+        var all_tasks = document.getElementById("all_tasks_div");
+        all_tasks.insertBefore(new_task_tag(response.id), all_tasks.firstChild);
+      }
+    });
+  }
+
+  function update_task(id) {
+    var title =    document.getElementById("title_input_" + id);
+    var priority = document.getElementById("priority_input_" + id);
+    var deadline = document.getElementById("deadline_input_" + id);
+    var done =     document.getElementById("done_input_" + id);
+    var data = {
+      "id":       id,
+      "title":    title.value,
+      "priority": Number(priority.value),
+      "deadline": deadline ? deadline.value : null,
+      "done":     done.checked,
+    };
+    console.log(data);
+    send("POST", "/calapp/tasks_update", data, function(request) {
+      if (request.status == 200) {
+        console.log('success');
+      }
+    });
+  }
+
+  function delete_task(id) {
+    send("POST", "/calapp/tasks_delete", {"id": id}, function(request) {
+      if (request.status == 200) {
+        var response = JSON.parse(request.responseText);
+        console.log(response);
+        document.getElementById("task_" + id).remove();
+      }
+    });
+  }
+
+  function new_child_task(id) {
+    send("POST", "/calapp/tasks_create_child", {"parent_id": id}, function(request) {
+      var response = JSON.parse(request.responseText);
+      console.log(response);
+      var parent = document.getElementById("children_" + id);
+      parent.insertBefore(new_child_task_tag(response.id), parent.firstChild);
+    });
+  }
+
+  function send(method, endpoint, data, callback=function(request){}) {
+    const xhr = new XMLHttpRequest();
+    xhr.open(method, endpoint, true);
+    xhr.setRequestHeader('X-CSRFToken', "{{csrf_token}}");
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.onreadystatechange = function() {
+      if (xhr.readyState == 4) {
+        callback(xhr);
+      }
+    };
+    xhr.send(JSON.stringify(data));
   }
 </script>
 
@@ -43,6 +207,27 @@
     border: 1px solid black;
     display: inline-block;
     padding: 20px 20px;
+  }
+  .child_div {
+    background-color: #b8cedd;
+    color: black;
+    border: 1px solid black;
+    display: inline-block;
+    padding: 5px 5px;
+  }
+  .title_input {
+    width: 280;
+  }
+  .priority_input {
+    width: 70;
+  }
+  .deadline_input {
+    width: 120;
+  }
+  .done_input {
+  }
+  #delete_button {
+    float: right;
   }
   @media (prefers-color-scheme: dark) {
     body {
@@ -60,7 +245,14 @@
       color: lightgrey;
       border: 1px solid black;
       display: inline-block;
-      padding: 2px 20px;
+      padding: 20px 20px;
+    }
+    .child_div {
+      background-color: #555555;
+      color: lightgrey;
+      border: 1px solid black;
+      display: inline-block;
+      padding: 5px 5px;
     }
     input {
       background-color: #202020;

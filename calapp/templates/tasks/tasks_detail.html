@@ -1,0 +1,79 @@
+
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+
+<body>
+  <div class="container">
+    <p>Tasks Detail</p>
+  </div>
+
+  <form id="date_form" onsubmit="return submit_date_form()">
+
+    <table>
+      <tr>
+        <td> <label>Title</label> </td>
+        <td> <input id="title_input"> </td>
+      </tr>
+      <tr>
+        <td> <label>Deadline:</label> </td>
+        <td> <input type="date" id="deadline_input"> </td>
+      </tr>
+      <tr>
+        <td> <label>Priority:</label> </td>
+        <td> <input type="number" id="priority_input"> </td>
+      </tr>
+      <tr>
+        <td> <label>Done:</label> </td>
+        <td> <input type="checkbox" id="done_input"> </td>
+      </tr>
+      <tr>
+        <td> <label>Children:</label> </td>
+        <td></td>
+      </tr>
+      <tr>
+        <td> <button type="button" onclick="submit_tasks_form()">Submit</button> </td>
+      </tr>
+    </table>
+
+  </form>
+  <a href="javascript:history.back()">Back</a>
+
+</body>
+
+<script>
+  window.onload = function() {
+  }
+
+  function submit_tasks_form() {
+    console.log("submit");
+    var title = document.getElementById('title_input').value;
+    var deadline = document.getElementById('deadline_input').value;
+    var priority = document.getElementById('priority_input').value;
+    var done = document.getElementById('done_input').checked;
+    console.log("Title: " + title);
+    console.log("Deadline: " + deadline);
+    console.log("Priority: " + priority);
+    console.log("Done: " + done);
+  }
+</script>
+
+<style>
+  body {
+    background-color: white;
+    color: black;
+  }
+  @media (prefers-color-scheme: dark) {
+    body {
+      background-color: #353535;
+      color: lightgrey;
+    }
+    input {
+      background-color: #202020;
+      color: lightgrey;
+    }
+    a {
+      color: lightblue;
+    }
+  }
+</style>
