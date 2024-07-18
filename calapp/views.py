@@ -429,7 +429,7 @@ def tasks_update(request):
             task.deadline = datetime.datetime.strptime(data['deadline'], "%Y-%m-%d") if data['deadline'] != '' else task.deadline
         if data['priority']:
             task.priority = data['priority']
-        if data['done']:
+        if data['done'] is not None:
             task.done = data['done']
         task.save()
         return JsonResponse({}, status=200)

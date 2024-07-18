@@ -39,17 +39,9 @@
   window.onload = function() {
     document.getElementById("prev_button").disabled = true;
     display_page(page);
-    // load_data_serversize();
   }
 
   function display_page(page) {
-    // send("POST", "/calapp/tasks_get_parents", 
-    //   {
-    //     "obj_per_page": obj_per_page,
-    //     "page": page,
-    //     "mode": "all",
-    //   },
-
     send("GET", 
       `/calapp/tasks_get_parents?mode=all&page=${page}&obj_per_page=${obj_per_page}`, 
       {},
@@ -62,6 +54,7 @@
         for (const task of tasks) {
           var all_tasks = document.getElementById("all_tasks_div");
           all_tasks.append(new_task_tag(task.id));
+          set_new_task_callbacks(task.id);
           document.getElementById("title_input_"+task.id).value = task.title;
           document.getElementById("priority_input_"+task.id).value = task.priority;
           document.getElementById("deadline_input_"+task.id).value = task.deadline;
@@ -77,6 +70,7 @@
               for (const child of tasks) {
                 var all_tasks = document.getElementById("children_"+task.id);
                 all_tasks.append(new_child_task_tag(child.id));
+                set_new_child_callbacks(child.id);
                 document.getElementById("title_input_"+child.id).value = child.title;
                 document.getElementById("priority_input_"+child.id).value = child.priority;
                 document.getElementById("done_input_"+child.id).checked = child.done;
@@ -108,31 +102,6 @@
     display_page(page);
   }
 
-  function load_data_serversize() {
-    {% for task in tasks %}
-      {% if task.parent == nil %}
-      var all_tasks = document.getElementById("all_tasks_div");
-      all_tasks.append(new_task_tag({{task.id}}));
-      document.getElementById("title_input_{{task.id}}").value = "{{task.title}}";
-      document.getElementById("priority_input_{{task.id}}").value = {{task.priority}};
-      document.getElementById("deadline_input_{{task.id}}").value = 
-        "{{task.deadline.year}}".padStart(4, 0) +"-"+
-        "{{task.deadline.month}}".padStart(2, 0) +"-"+
-        "{{task.deadline.day}}".padStart(2, 0);
-      document.getElementById("done_input_{{task.id}}").checked = "{{task.done}}" == "True";
-      {% endif %}
-    {% endfor %}
-
-    {% for task in tasks %}
-      {% if task.parent != nil %}
-      var parent = document.getElementById("children_{{task.parent.id}}");
-      parent.append(new_child_task_tag({{task.id}}));
-      document.getElementById("title_input_{{task.id}}").value = "{{task.title}}";
-      document.getElementById("priority_input_{{task.id}}").value = {{task.priority}};
-      document.getElementById("done_input_{{task.id}}").checked = "{{task.done}}" == "True";
-      {% endif %}
-    {% endfor %}
-  }
 
   function new_task_tag(id) {
     var tag = document.createElement('p');
@@ -143,11 +112,8 @@
                 <tr>
                   <td> <input type="checkbox" id="done_input_${id}"> </td>
                   <td> 
-                    <label>Title: </label>
                     <input class="title_input" id="title_input_${id}"> 
                   </td>
-                </tr>
-                <tr>
                 </tr>
                 <tr>
                   <td></td>
@@ -160,34 +126,37 @@
                 </tr>
                 <tr>
                   <td></td>
-                  <td>
-                    <button id="update_button" onclick="update_task(${id})">Update</button>
-                    <button id="delete_button" onclick="delete_task(${id})">Delete</button>
-                  </td>
-                </tr>
-                <tr>
-                  <td></td>
-                  <td> <label>Children:</label> </td>
-                  <td></td>
-                </tr>
-                <tr>
-                  <td></td>
-                  <td>
-                    <button id="new_child_button" onclick="new_child_task(${id})">New Child</button>
+                  <td class="buttons">
+                    <button class="update_button" id="update_button_${id}" disabled onclick="update_task(${id})">Update</button>
+                    <button class="new_child_button" onclick="new_child_task(${id})">New Child</button>
+                    <button class="delete_button" onclick="delete_task(${id})">Delete</button>
                   </td>
                 </tr>
                 <tr>
                   <td></td>
                   <td>
-                  <p id="children_${id}">
-                  </p>
+                    <p id="children_${id}"></p>
                   </td>
-                  <td></td>
                 </tr>
               </table>
             </div>
     `;
     return tag;
+  }
+
+  function set_new_task_callbacks(id) {
+    document.getElementById("done_input_"+id).addEventListener('input', function (event) {
+      document.getElementById("update_button_"+id).disabled = false;
+    });
+    document.getElementById("title_input_"+id).addEventListener('input', function (event) {
+      document.getElementById("update_button_"+id).disabled = false;
+    });
+    document.getElementById("priority_input_"+id).addEventListener('input', function (event) {
+      document.getElementById("update_button_"+id).disabled = false;
+    });
+    document.getElementById("deadline_input_"+id).addEventListener('input', function (event) {
+      document.getElementById("update_button_"+id).disabled = false;
+    });
   }
 
   function new_child_task_tag(id) {
@@ -199,12 +168,10 @@
                 <tr>
                   <td> <input type="checkbox" id="done_input_${id}"> </td>
                   <td> 
-                    <label>Title: </label>
-                    <input class="title_input" id="title_input_${id}"> 
-                    <label>Priority:</label> 
+                    <input class="child_title_input" id="title_input_${id}"> 
                     <input class="priority_input" type="number" id="priority_input_${id}">
-                    <button id="update_button" onclick="update_task(${id})">Update</button>
-                    <button id="delete_button" onclick="delete_task(${id})">Delete</button>
+                    <button class="update_button" id="update_button_${id}" disabled onclick="update_task(${id})">Up</button>
+                    <button class="delete_button" onclick="delete_task(${id})">Del</button>
                   </td>
                 </tr>
               </table>
@@ -212,6 +179,18 @@
     `;
     return tag;
   }
+  function set_new_child_callbacks(id) {
+    document.getElementById("done_input_"+id).addEventListener('input', function (event) {
+      document.getElementById("update_button_"+id).disabled = false;
+    });
+    document.getElementById("title_input_"+id).addEventListener('input', function (event) {
+      document.getElementById("update_button_"+id).disabled = false;
+    });
+    document.getElementById("priority_input_"+id).addEventListener('input', function (event) {
+      document.getElementById("update_button_"+id).disabled = false;
+    });
+  }
+
 
   function new_task() {
     send("POST", "/calapp/tasks_create", {}, function(request) {
@@ -220,6 +199,7 @@
         console.log(response);
         var all_tasks = document.getElementById("all_tasks_div");
         all_tasks.insertBefore(new_task_tag(response.id), all_tasks.firstChild);
+        set_new_task_callbacks(response.id);
       }
     });
   }
@@ -240,6 +220,7 @@
     send("PUT", "/calapp/tasks_update", data, function(request) {
       if (request.status == 200) {
         console.log('success');
+        document.getElementById("update_button_"+id).disabled = true;
       }
     });
   }
@@ -260,6 +241,7 @@
       console.log(response);
       var parent = document.getElementById("children_" + id);
       parent.insertBefore(new_child_task_tag(response.id), parent.firstChild);
+      set_new_child_callbacks(response.id);
     });
   }
 
@@ -290,27 +272,37 @@
     color: black;
     border: 1px solid black;
     display: inline-block;
-    padding: 20px 20px;
+    padding: 5px 5px;
+    width: 350;
   }
   .child_div {
     background-color: #b8cedd;
     color: black;
     border: 1px solid black;
     display: inline-block;
-    padding: 5px 5px;
+    padding: 2px 2px;
+  }
+  .buttons {
   }
   .title_input {
     width: 280;
   }
+  .child_title_input {
+    width: 150;
+  }
   .priority_input {
-    width: 70;
+    width: 40;
   }
   .deadline_input {
-    width: 120;
+    width: 100;
   }
   .done_input {
   }
-  #delete_button {
+  .new_child_button {
+  }
+  .update_button {
+  }
+  .delete_button {
     float: right;
   }
   @media (prefers-color-scheme: dark) {
@@ -329,14 +321,14 @@
       color: lightgrey;
       border: 1px solid black;
       display: inline-block;
-      padding: 20px 20px;
+      padding: 5px 5px;
     }
     .child_div {
       background-color: #555555;
       color: lightgrey;
       border: 1px solid black;
       display: inline-block;
-      padding: 5px 5px;
+      padding: 2px 2px;
     }
     input {
       background-color: #202020;
