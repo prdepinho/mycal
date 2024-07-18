@@ -12,7 +12,7 @@ import datetime
 import calendar
 import json
 
-from .models import Appointment, AppointmentForm, Timer, Task, TaskForm
+from .models import Appointment, AppointmentForm, Timer, Task
 
 import logging
 
@@ -462,6 +462,8 @@ def tasks_delete(request):
     if request.method == "DELETE":
         data = json.loads(request.body)
         task = Task.objects.get(pk=data['id'])
+        if task.appointment:
+            task.appointment.delete()
         task.delete()
         return JsonResponse({}, status=200)
     return JsonResponse({}, status=405)
