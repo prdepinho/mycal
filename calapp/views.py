@@ -6,6 +6,7 @@ from django.shortcuts import render
 from django.contrib.auth import logout
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator, EmptyPage
 from django.db.models import Q
 import datetime
 import calendar
@@ -339,8 +340,57 @@ def tasks_detail(request, id):
     pass
 
 @login_required(login_url="/calapp/accounts/login")
-def tasks_get(request):
-    pass
+def tasks_get_parents(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            obj_per_page = data['obj_per_page']
+            page = data['page']
+            mode = data['mode']
+
+            if mode == "all":
+                tasks = Task.objects.filter(
+                        Q(owner=request.user.username) & Q(parent=None)
+                        ).order_by('priority').reverse()
+            elif mode == "done":
+                tasks = Task.objects.filter(
+                        Q(owner=request.user.username) & Q(parent=None) & Q(done=True)
+                        ).order_by('priority').reverse()
+            elif mode == "active":
+                tasks = Task.objects.filter(
+                        Q(owner=request.user.username) & Q(parent=None) & Q(done=False)
+                        ).order_by('priority').reverse()
+            else:
+                return JsonResponse({}, status=400)
+
+            paginator = Paginator(tasks, obj_per_page)
+            page = paginator.page(page)
+            objects = list(page.object_list.values())
+
+            return JsonResponse({"objects": objects, "has_next": page.has_next()}, status=200)
+        except EmptyPage:
+            JsonResponse({}, status=404);
+    else:
+        return JsonResponse({}, status=400)
+
+@login_required(login_url="/calapp/accounts/login")
+def tasks_get_children(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            parent_id = data['parent_id']
+
+            tasks = Task.objects.filter(
+                    Q(owner=request.user.username) & Q(parent__id=parent_id)
+                    ).order_by('done', '-priority')
+            objects = list(tasks.values())
+
+            return JsonResponse({"objects": objects}, status=200)
+        except EmptyPage:
+            JsonResponse({}, status=404);
+    else:
+        return JsonResponse({}, status=400)
+
 
 
 @login_required(login_url="/calapp/accounts/login")
@@ -377,7 +427,7 @@ def tasks_create_child(request):
                 )
         task.save()
         return JsonResponse({"id": task.id}, status=200)
-    return JsonResponse({}, status=404)
+    return JsonResponse({}, status=400)
 
 @login_required(login_url="/calapp/accounts/login")
 def tasks_update(request):
@@ -394,7 +444,7 @@ def tasks_update(request):
             task.done = data['done']
         task.save()
         return JsonResponse({}, status=200)
-    return JsonResponse({}, status=404)
+    return JsonResponse({}, status=400)
 
 @login_required(login_url="/calapp/accounts/login")
 def tasks_delete(request):
@@ -403,4 +453,4 @@ def tasks_delete(request):
         task = Task.objects.get(pk=data['id'])
         task.delete()
         return JsonResponse({}, status=200)
-    return JsonResponse({}, status=404)
+    return JsonResponse({}, status=400)
