@@ -42,6 +42,7 @@ class Task(models.Model):
     priority = models.IntegerField(default=0)
     done = models.BooleanField(default=False)
     parent = models.ForeignKey('self', null=True, on_delete=models.CASCADE)
+    appointment = models.ForeignKey(Appointment, null=True, on_delete=models.CASCADE)
 
 class TaskForm(ModelForm):
     model = Task

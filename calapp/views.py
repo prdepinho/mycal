@@ -387,7 +387,7 @@ def tasks_create(request):
     if request.method == "POST":
         task = Task.objects.create(
                 owner=request.user.username,
-                title="New Task",
+                title="",
                 created=datetime.date.today(),
                 deadline=datetime.date.today(),
                 priority=0,
@@ -407,7 +407,7 @@ def tasks_create_child(request):
             return JsonResponse({}, status=404)
         task = Task.objects.create(
                 owner=request.user.username,
-                title="New Task",
+                title="",
                 created=datetime.date.today(),
                 deadline=datetime.date.today(),
                 priority=0,
@@ -423,6 +423,7 @@ def tasks_update(request):
     if request.method == "PUT":
         data = json.loads(request.body)
         task = Task.objects.get(pk=data['id'])
+
         if data['title']:
             task.title = data['title']
         if data['deadline']:
@@ -431,6 +432,27 @@ def tasks_update(request):
             task.priority = data['priority']
         if data['done'] is not None:
             task.done = data['done']
+
+        if task.parent is None:
+            if task.done:
+                apt_name = "Task (Done): %s" % (task.title)
+            else:
+                apt_name = "Task (%d): %s" % (task.priority, task.title)
+
+            if not task.appointment:
+                task.appointment = Appointment.objects.create(
+                        owner=request.user.username,
+                        date=task.deadline,
+                        yearly=False,
+                        description=apt_name,
+                        )
+                task.appointment.save()
+
+            else:
+                task.appointment.date = task.deadline
+                task.appointment.description = apt_name
+                task.appointment.save()
+
         task.save()
         return JsonResponse({}, status=200)
     return JsonResponse({}, status=405)
