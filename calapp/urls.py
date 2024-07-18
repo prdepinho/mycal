@@ -30,8 +30,6 @@ urlpatterns = [
 
         # ---
         path("tasks/", views.tasks_list, name="tasks_list"),
-        path("tasks/<str:mode>", views.tasks_list, name="tasks_list"),
-        path("tasks/<int:id>", views.tasks_detail, name="tasks_detail"),
         path("tasks_get_parents", views.tasks_get_parents, name="tasks_parents"),
         path("tasks_get_children", views.tasks_get_children, name="tasks_children"),
         path("tasks_create", views.tasks_create, name="tasks_create"),

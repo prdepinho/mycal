@@ -43,12 +43,16 @@
   }
 
   function display_page(page) {
-    send("POST", "/calapp/tasks_get_parents", 
-      {
-        "obj_per_page": obj_per_page,
-        "page": page,
-        "mode": "all",
-      },
+    // send("POST", "/calapp/tasks_get_parents", 
+    //   {
+    //     "obj_per_page": obj_per_page,
+    //     "page": page,
+    //     "mode": "all",
+    //   },
+
+    send("GET", 
+      `/calapp/tasks_get_parents?mode=all&page=${page}&obj_per_page=${obj_per_page}`, 
+      {},
       function(request) {
         var response = JSON.parse(request.responseText);
         console.log(response);
@@ -63,10 +67,8 @@
           document.getElementById("deadline_input_"+task.id).value = task.deadline;
           document.getElementById("done_input_"+task.id).checked = task.done;
 
-          send("POST", "/calapp/tasks_get_children", 
-            { 
-              "parent_id": task.id 
-            },
+          send("GET", `/calapp/tasks_get_children?parent_id=${task.id}`, 
+            {},
             function(request) {
               var response = JSON.parse(request.responseText);
               console.log(response);
@@ -235,7 +237,7 @@
       "done":     done.checked,
     };
     console.log(data);
-    send("POST", "/calapp/tasks_update", data, function(request) {
+    send("PUT", "/calapp/tasks_update", data, function(request) {
       if (request.status == 200) {
         console.log('success');
       }
@@ -243,7 +245,7 @@
   }
 
   function delete_task(id) {
-    send("POST", "/calapp/tasks_delete", {"id": id}, function(request) {
+    send("DELETE", "/calapp/tasks_delete", {"id": id}, function(request) {
       if (request.status == 200) {
         var response = JSON.parse(request.responseText);
         console.log(response);

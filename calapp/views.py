@@ -323,30 +323,18 @@ def timer_update(request):
 
 
 @login_required(login_url="/calapp/accounts/login")
-def tasks_list(request, mode="all"):
-    if mode == "all":
-        tasks = Task.objects.filter(Q(owner=request.user.username)).order_by('priority').reverse()
-    elif mode == "done":
-        tasks = Task.objects.filter(Q(owner=request.user.username) & Q(done=True)).order_by('priority').reverse()
-    elif mode == "active":
-        tasks = Task.objects.filter(Q(owner=request.user.username) & Q(done=False)).order_by('priority').reverse()
-    else:
-        tasks = Task.objects.filter(Q(owner=request.user.username) & Q(done=False)).order_by('priority').reverse()
+def tasks_list(request):
+    tasks = Task.objects.filter(Q(owner=request.user.username)).order_by('priority').reverse()
     context = { 'tasks': tasks }
     return render(request, "tasks/tasks_list.html", context=context)
 
 @login_required(login_url="/calapp/accounts/login")
-def tasks_detail(request, id):
-    pass
-
-@login_required(login_url="/calapp/accounts/login")
 def tasks_get_parents(request):
-    if request.method == "POST":
+    if request.method == "GET":
         try:
-            data = json.loads(request.body)
-            obj_per_page = data['obj_per_page']
-            page = data['page']
-            mode = data['mode']
+            obj_per_page = int(request.GET.get("obj_per_page", 10))
+            page = int(request.GET.get("page", 1))
+            mode = request.GET.get("mode", "all")
 
             if mode == "all":
                 tasks = Task.objects.filter(
@@ -371,14 +359,15 @@ def tasks_get_parents(request):
         except EmptyPage:
             JsonResponse({}, status=404);
     else:
-        return JsonResponse({}, status=400)
+        return JsonResponse({}, status=405)
 
 @login_required(login_url="/calapp/accounts/login")
 def tasks_get_children(request):
-    if request.method == "POST":
+    if request.method == "GET":
         try:
-            data = json.loads(request.body)
-            parent_id = data['parent_id']
+            parent_id = request.GET.get("parent_id")
+            if not parent_id:
+                return JsonResponse({}, status=400)
 
             tasks = Task.objects.filter(
                     Q(owner=request.user.username) & Q(parent__id=parent_id)
@@ -389,7 +378,7 @@ def tasks_get_children(request):
         except EmptyPage:
             JsonResponse({}, status=404);
     else:
-        return JsonResponse({}, status=400)
+        return JsonResponse({}, status=405)
 
 
 
@@ -431,7 +420,7 @@ def tasks_create_child(request):
 
 @login_required(login_url="/calapp/accounts/login")
 def tasks_update(request):
-    if request.method == "POST":
+    if request.method == "PUT":
         data = json.loads(request.body)
         task = Task.objects.get(pk=data['id'])
         if data['title']:
@@ -444,13 +433,13 @@ def tasks_update(request):
             task.done = data['done']
         task.save()
         return JsonResponse({}, status=200)
-    return JsonResponse({}, status=400)
+    return JsonResponse({}, status=405)
 
 @login_required(login_url="/calapp/accounts/login")
 def tasks_delete(request):
-    if request.method == "POST":
+    if request.method == "DELETE":
         data = json.loads(request.body)
         task = Task.objects.get(pk=data['id'])
         task.delete()
         return JsonResponse({}, status=200)
-    return JsonResponse({}, status=400)
+    return JsonResponse({}, status=405)
