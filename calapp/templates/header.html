@@ -1,0 +1,8 @@
+
+<div>
+  {{user.get_username}}
+  <a href="{% url 'logout' %}?next={{request.path}}">Logout</a>
+  <a href="{% url 'default' %}">Calendar</a>
+  <a href="{% url 'timer_page' %}">Timers</a>
+  <a href="{% url 'tasks_list' %}">Tasks</a>
+</div>

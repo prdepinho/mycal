@@ -1,19 +1,11 @@
 
-<head>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-</head>
+{% include "head.html" %}
 
 <body>
   <div class="container">
-    <p>
-      {{user.get_username}}
-      <a href="{% url 'logout' %}?next={{request.path}}">Logout</a>
-      <a href="{% url 'default' %}?next={{request.path}}">Calendar</a>
-      <a href="{% url 'timer_list' %}?next={{request.path}}">Timers</a>
-      <br/>
-      <a href="{% url 'tasks_create' %}?next={{request.path}}">New Task</a>
-    </p>
     <p>Tasks List</p>
+
+    {% include "header.html" %}
 
     <p>
       <button type="button" onclick="new_task()">New Task</button>
@@ -245,28 +237,9 @@
     });
   }
 
-  function send(method, endpoint, data, callback=function(request){}) {
-    return new Promise((resolve, reject) => {
-      const xhr = new XMLHttpRequest();
-      xhr.open(method, endpoint, true);
-      xhr.setRequestHeader('X-CSRFToken', "{{csrf_token}}");
-      xhr.setRequestHeader('Content-Type', 'application/json');
-      xhr.onreadystatechange = function() {
-        if (xhr.readyState == 4) {
-          callback(xhr);
-          resolve('success')
-        }
-      };
-      xhr.send(JSON.stringify(data));
-    });
-  }
 </script>
 
 <style>
-  body {
-    background-color: white;
-    color: black;
-  }
   .task_div {
     background-color: #b8cedd;
     color: black;
@@ -306,10 +279,6 @@
     float: right;
   }
   @media (prefers-color-scheme: dark) {
-    body {
-      background-color: #353535;
-      color: lightgrey;
-    }
     .detail {
       display: inline-block;
     }
@@ -329,13 +298,6 @@
       border: 1px solid black;
       display: inline-block;
       padding: 2px 2px;
-    }
-    input {
-      background-color: #202020;
-      color: lightgrey;
-    }
-    a {
-      color: lightblue;
     }
   }
 </style>

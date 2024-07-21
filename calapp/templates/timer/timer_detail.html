@@ -1,25 +1,23 @@
 
-<head>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-</head>
+{% include "head.html" %}
 
 <body>
   <p>Timer</p>
   <p>
-    <input id="timername" value="{{timer.name}}" onkeydown="click_save_timer(event)"/>
+    <input id="timername" value="{{timer.name}}" onkeydown="click_save_count(event)"/>
   </p>
   <input id="timercount" hidden type="integer" value="{{timer.count}}" />
-  <input id=readable onkeydown="click_save_timer(event)" />
+  <input id=readable onkeydown="click_save_count(event)" />
   <p>
     <button id="timerbutton">Start</button>
   </p>
-  <a href="/calapp/timer">Back</a>
+  <a href="/calapp/timer/page/">Back</a>
 </body>
 
 <script>
+  var running = false;
   window.onload = function() {
     var count = {{timer.count}};
-    var running = false;
     document.getElementById('timercount').innerHTML = count + ' ';
 
     readable_counter(count);
@@ -40,18 +38,27 @@
       if (!running) {
         button.innerHTML = 'Stop';
         running = true;
+        timer_save();
       }
       else {
         button.innerHTML = 'Start';
         running = false;
-        save_timer_post()
+        timer_save()
       }
     });
+
+    if ("{{timer.running}}" == 'True') {
+      button.innerHTML = 'Stop';
+      running = true;
+    }
   }
 
   window.onbeforeunload = function() {
     console.log("before unload");
-    save_timer_post();
+    if (running) {
+      running = false;
+      timer_save();
+    }
   }
 
   function readable_counter(count) {
@@ -78,45 +85,37 @@
     return count;
   }
 
-  function click_save_timer(event) {
+  function click_save_count(event) {
     if (event.key === 'Enter') {
-      save_timer_post();
+      var name = document.getElementById('timername').value;
+      var count = readable_to_secs();
+      send('PUT', "/calapp/timer/", {
+        "id": {{timer.id}},
+        "name": name,
+        "count": count,
+        "running": running,
+      }, function(request) {
+        if (request.status == 204) {
+          console.log('update successful');
+        }
+      });
     }
   }
 
-  function save_timer_post() {
+  function timer_save() {
     var name = document.getElementById('timername').value;
-    var count = readable_to_secs();
-
-    const xhr = new XMLHttpRequest();
-    xhr.open('POST', "/calapp/timer_update", true);
-    xhr.setRequestHeader('X-CSRFToken', "{{csrf_token}}");
-    xhr.setRequestHeader('Content-Type', 'application/json');
-
-    xhr.onreadystatechange = function() {
-      console.log('XHR state: ' + xhr.readyState + ", status: " + xhr.status);
-    };
-    xhr.send(JSON.stringify({"id": {{timer.id}}, "name": name, "count": count}));
+    send('PUT', "/calapp/timer/", {
+      "id": {{timer.id}},
+      "name": name,
+      "running": running,
+    }, function(request) {
+      if (request.status == 204) {
+        console.log('update successful');
+      }
+    });
   }
 
 </script>
 
 <style>
-  body {
-    background-color: white;
-    color: black;
-  }
-  @media (prefers-color-scheme: dark) {
-    body {
-      background-color: #353535;
-      color: lightgrey;
-    }
-    input {
-      background-color: #202020;
-      color: lightgrey;
-    }
-    a {
-      color: lightblue;
-    }
-  }
 </style>

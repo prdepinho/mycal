@@ -32,6 +32,7 @@ class Timer(models.Model):
     count = models.IntegerField(default=0)
     name = models.CharField(max_length=256)
     owner = models.CharField(max_length=256)
+    running = models.BooleanField(default=False)
 
 
 class Task(models.Model):
@@ -44,11 +45,3 @@ class Task(models.Model):
     parent = models.ForeignKey('self', null=True, on_delete=models.CASCADE)
     appointment = models.ForeignKey(Appointment, null=True, on_delete=models.CASCADE)
 
-class TaskForm(ModelForm):
-    model = Task
-    fields = '__all__'
-    widgets = {
-            'title': TextInput(attrs={'autofocus': True}),
-            'deadline': DateInput(attrs={'type':'date'}),
-            'owner': TextInput(attrs={'readonly': 'readonly'}),
-            }

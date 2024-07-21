@@ -1,19 +1,14 @@
 
-<head>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-</head>
+{% include "head.html" %}
 
 <body>
 
   <div class="container">
+
   <p>
-    {{user.get_username}}
-    <a href="{% url 'logout' %}?next={{request.path}}">Logout</a>
-    <a href="{% url 'timer_list' %}?next={{request.path}}">Timers</a>
-    <a href="{% url 'tasks_list' %}?next={{request.path}}">Tasks</a>
-    <br/>
+    {% include "header.html" %}
     <a href="{% url 'select' %}?next={{request.path}}">Select</a>
-  </p>
+  <p/>
 
   {% for mkey, month in months.items %}
     <div id="{{mkey}}" class="month_div">
@@ -126,10 +121,6 @@
 
 
 <style>
-  body {
-    background-color: white;
-    color: black;
-  }
   .month_div {
     background-color: #b8cedd;
     color: black;
@@ -181,17 +172,6 @@
     color:white;
   }
   @media (prefers-color-scheme: dark) {
-    body {
-      background-color: #353535;
-      color: #e5e5e5;
-    }
-    input {
-      background-color: #202020;
-      color: lightgrey;
-    }
-    a {
-      color: lightblue;
-    }
     .month_div {
       background-color: #555555;
       color: lightgrey;

@@ -1,16 +1,18 @@
 from django.shortcuts import render, redirect, HttpResponseRedirect
-from django.http import HttpResponse, JsonResponse
+from django.forms.models import model_to_dict
+from django.http import HttpResponse, JsonResponse, Http404
 from django.template import loader
-from django.http import Http404
 from django.shortcuts import render
 from django.contrib.auth import logout
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator, EmptyPage
 from django.db.models import Q
+from django.utils import timezone
 import datetime
 import calendar
 import json
+import math
 
 from .models import Appointment, AppointmentForm, Timer, Task
 
@@ -274,52 +276,118 @@ def appointment_delete(request, id):
         return HttpResponse("error: %s" % str(e))
 
 
-# ---
+
+# --- Timer ---
 
 @login_required(login_url="/calapp/accounts/login")
-def timer_list(request):
-    timers = Timer.objects.filter(Q(owner=request.user.username)).order_by('updated').reverse()
-    context = { 'timers': timers }
-    return render(request, "timer/timer_list.html", context=context)
+def timer_page(request):
+    id = int(request.GET.get('id', 0))
+    page = int(request.GET.get('page', 0))
+    obj_per_page = int(request.GET.get('obj_per_page', 10))
+
+    if request.method == "GET":
+        if id > 0:
+            return _timer_detail(request, id)
+        else:
+            return render(request, "timer/timer_list.html", context={})
+    else:
+        return JsonResponse({}, status=405)
 
 @login_required(login_url="/calapp/accounts/login")
-def timer_detail(request, id):
-    timer = Timer.objects.get(pk=id)
-    context = { 'timer': timer }
-    return render(request, "timer/timer_detail.html", context=context)
+def timer(request):
+    id = int(request.GET.get('id', 0))
+    page = int(request.GET.get('page', 0))
+    obj_per_page = int(request.GET.get('obj_per_page', 10))
 
-@login_required(login_url="/calapp/accounts/login")
-def timer_create(request):
-    timer = Timer.objects.create(updated=datetime.datetime.now(), count=0, name='New timer',
+    if request.method == "GET":
+        if id > 0:
+            return _timer_get_by_id(request, id)
+        else:
+            return _timer_get_by_page(request, page, obj_per_page)
+
+    elif request.method == "POST":
+        return _timer_create(request)
+
+    elif request.method == "PUT":
+        return _timer_update(request)
+
+    elif request.method == "DELETE":
+        return _timer_delete(request, id)
+
+    else:
+        return JsonResponse({}, status=405)
+
+def _timer_get_by_id(request, id):
+    try:
+        timer = Timer.objects.get(pk=id)
+        return JsonResponse(model_to_dict(timer), status=200)
+    except (EmptyPage, Timer.DoesNotExist):
+        return JsonResponse({}, status=404)
+
+def _timer_get_by_page(request, page, obj_per_page):
+    try:
+        timers = Timer.objects.filter(
+                Q(owner=request.user.username)
+                ).order_by('-updated')
+        paginator = Paginator(timers, obj_per_page)
+        page = paginator.page(page)
+        objects = list(page.object_list.values())
+        return JsonResponse({'objects': objects, 'has_next': page.has_next()}, status=200)
+    except EmptyPage:
+        return JsonResponse({}, status=404)
+
+def _timer_detail(request, id):
+    try:
+        timer = Timer.objects.get(pk=id)
+        return render(request, "timer/timer_detail.html", context={"timer": timer})
+    except Timer.DosNotExist:
+        raise Http404("Timer not found")
+
+def _timer_create(request):
+    new_time = timezone.make_aware(datetime.datetime.now(), timezone.get_current_timezone())
+    timer = Timer.objects.create(
+            updated=new_time,
+            count=0,
+            name='New timer',
             owner=request.user.username)
     timer.save()
-    return redirect('/calapp/timer')
+    return JsonResponse({"id": timer.id}, status=201)
 
-@login_required(login_url="/calapp/accounts/login")
-def timer_delete(request, id):
-    timer = Timer.objects.get(pk=id)
-    timer.delete()
-    return redirect('/calapp/timer')
-
-
-@login_required(login_url="/calapp/accounts/login")
-def timer_update(request):
-    logger.debug('timer_save')
-    if request.method == "POST":
-        logger.debug('is POST')
+def _timer_update(request):
+    try:
         data = json.loads(request.body)
         timer = Timer.objects.get(pk=data['id'])
+
+        started = not timer.running and data['running']
+        new_time = timezone.make_aware(datetime.datetime.now(), timezone.get_current_timezone())
+
+        if 'count' in data:
+            timer.count = data['count']
+
+        else:
+            if not started:
+                old_time = timer.updated
+                delta = (new_time - old_time).total_seconds()
+                timer.count += int(delta)
+                logger.debug("old time: " + str(old_time))
+                logger.debug("new time: " + str(new_time))
+                logger.debug("dif: " + str(delta))
+
         timer.name = data['name']
-        timer.count = data['count']
-        timer.updated = datetime.datetime.now()
+        timer.running = data['running']
+        timer.updated = new_time
+
         timer.save()
-        return HttpResponse(status=200)
-    else:
-        logger.debug('is not POST (%s)' % request.method)
-        return HttpResponse('Method is not POST')
+        return JsonResponse({}, status=204)
+    except Timer.DoesNotExist:
+        return JsonResponse(status=404)
 
+def _timer_delete(request, id):
+    timer = Timer.objects.get(pk=id)
+    timer.delete()
+    return JsonResponse({}, status=204)
 
-# ---
+# --- Tasks ---
 
 
 @login_required(login_url="/calapp/accounts/login")
