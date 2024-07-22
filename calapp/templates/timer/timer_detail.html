@@ -1,4 +1,5 @@
 
+{% load static %}
 {% include "head.html" %}
 
 <body>
@@ -16,24 +17,24 @@
 
 <script>
   var running = false;
+
   window.onload = function() {
+    console.log('onload');
     var count = {{timer.count}};
     document.getElementById('timercount').innerHTML = count + ' ';
 
     readable_counter(count);
 
-    function loop() {
+    setInterval(function() {
       if (running) {
-        console.log('in the loop');
         count += 1;
         document.getElementById('timercount').value = count + ' ';
         readable_counter(count);
+        console.log('count: ' + count);
       }
-    }
-    setInterval(loop, 1000);
+    }, 1000);
 
     button = document.getElementById('timerbutton');
-    console.log(button);
     button.addEventListener('click', function(event) {
       if (!running) {
         button.innerHTML = 'Stop';

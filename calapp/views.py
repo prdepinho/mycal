@@ -340,7 +340,7 @@ def _timer_detail(request, id):
     try:
         timer = Timer.objects.get(pk=id)
         return render(request, "timer/timer_detail.html", context={"timer": timer})
-    except Timer.DosNotExist:
+    except Timer.DoesNotExist:
         raise Http404("Timer not found")
 
 def _timer_create(request):
