@@ -3,8 +3,6 @@
 
 <body>
   <div class="container">
-    <p>Tasks List</p>
-
     {% include "header.html" %}
 
     <p>
@@ -25,7 +23,7 @@
 
 <script>
   var page = 1;
-  var obj_per_page = 5;
+  var obj_per_page = 10;
   var has_next_page = true;
 
   window.onload = function() {
@@ -138,7 +136,7 @@
 
   function set_new_task_callbacks(id) {
     document.getElementById("done_input_"+id).addEventListener('input', function (event) {
-      document.getElementById("update_button_"+id).disabled = false;
+      update_task(id)
     });
     document.getElementById("title_input_"+id).addEventListener('input', function (event) {
       document.getElementById("update_button_"+id).disabled = false;
@@ -173,7 +171,7 @@
   }
   function set_new_child_callbacks(id) {
     document.getElementById("done_input_"+id).addEventListener('input', function (event) {
-      document.getElementById("update_button_"+id).disabled = false;
+      update_task(id)
     });
     document.getElementById("title_input_"+id).addEventListener('input', function (event) {
       document.getElementById("update_button_"+id).disabled = false;

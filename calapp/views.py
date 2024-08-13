@@ -293,6 +293,7 @@ def timer_page(request):
     else:
         return JsonResponse({}, status=405)
 
+
 @login_required(login_url="/calapp/accounts/login")
 def timer(request):
     id = int(request.GET.get('id', 0))
@@ -317,12 +318,14 @@ def timer(request):
     else:
         return JsonResponse({}, status=405)
 
+
 def _timer_get_by_id(request, id):
     try:
         timer = Timer.objects.get(pk=id)
         return JsonResponse(model_to_dict(timer), status=200)
     except (EmptyPage, Timer.DoesNotExist):
         return JsonResponse({}, status=404)
+
 
 def _timer_get_by_page(request, page, obj_per_page):
     try:
@@ -336,12 +339,14 @@ def _timer_get_by_page(request, page, obj_per_page):
     except EmptyPage:
         return JsonResponse({}, status=404)
 
+
 def _timer_detail(request, id):
     try:
         timer = Timer.objects.get(pk=id)
         return render(request, "timer/timer_detail.html", context={"timer": timer})
     except Timer.DoesNotExist:
         raise Http404("Timer not found")
+
 
 def _timer_create(request):
     new_time = timezone.make_aware(datetime.datetime.now(), timezone.get_current_timezone())
@@ -352,6 +357,7 @@ def _timer_create(request):
             owner=request.user.username)
     timer.save()
     return JsonResponse({"id": timer.id}, status=201)
+
 
 def _timer_update(request):
     try:
@@ -387,14 +393,16 @@ def _timer_delete(request, id):
     timer.delete()
     return JsonResponse({}, status=204)
 
+
 # --- Tasks ---
 
 
 @login_required(login_url="/calapp/accounts/login")
 def tasks_list(request):
-    tasks = Task.objects.filter(Q(owner=request.user.username)).order_by('priority').reverse()
+    tasks = Task.objects.filter(Q(owner=request.user.username)).order_by('done', 'priority').reverse()
     context = { 'tasks': tasks }
     return render(request, "tasks/tasks_list.html", context=context)
+
 
 @login_required(login_url="/calapp/accounts/login")
 def tasks_get_parents(request):
@@ -407,15 +415,15 @@ def tasks_get_parents(request):
             if mode == "all":
                 tasks = Task.objects.filter(
                         Q(owner=request.user.username) & Q(parent=None)
-                        ).order_by('priority').reverse()
+                        ).order_by('done', '-priority')
             elif mode == "done":
                 tasks = Task.objects.filter(
                         Q(owner=request.user.username) & Q(parent=None) & Q(done=True)
-                        ).order_by('priority').reverse()
+                        ).order_by('done', '-priority')
             elif mode == "active":
                 tasks = Task.objects.filter(
                         Q(owner=request.user.username) & Q(parent=None) & Q(done=False)
-                        ).order_by('priority').reverse()
+                        ).order_by('done', '-priority')
             else:
                 return JsonResponse({}, status=400)
 
@@ -429,6 +437,7 @@ def tasks_get_parents(request):
     else:
         return JsonResponse({}, status=405)
 
+
 @login_required(login_url="/calapp/accounts/login")
 def tasks_get_children(request):
     if request.method == "GET":
@@ -439,7 +448,7 @@ def tasks_get_children(request):
 
             tasks = Task.objects.filter(
                     Q(owner=request.user.username) & Q(parent__id=parent_id)
-                    ).order_by('done', '-priority')
+                    ).order_by('-priority')
             objects = list(tasks.values())
 
             return JsonResponse({"objects": objects}, status=200)
@@ -447,7 +456,6 @@ def tasks_get_children(request):
             JsonResponse({}, status=404);
     else:
         return JsonResponse({}, status=405)
-
 
 
 @login_required(login_url="/calapp/accounts/login")
@@ -465,6 +473,7 @@ def tasks_create(request):
         return JsonResponse({"id": task.id}, status=200)
     else:
         return render(request, "tasks/tasks_detail.html", context={})
+
 
 @login_required(login_url="/calapp/accounts/login")
 def tasks_create_child(request):
@@ -486,6 +495,7 @@ def tasks_create_child(request):
         return JsonResponse({"id": task.id}, status=200)
     return JsonResponse({}, status=400)
 
+
 @login_required(login_url="/calapp/accounts/login")
 def tasks_update(request):
     if request.method == "PUT":
@@ -503,9 +513,9 @@ def tasks_update(request):
 
         if task.parent is None:
             if task.done:
-                apt_name = "Task (Done): %s" % (task.title)
+                apt_name = "(Done) %s" % (task.title)
             else:
-                apt_name = "Task (%d): %s" % (task.priority, task.title)
+                apt_name = "(%d) %s" % (task.priority, task.title)
 
             if not task.appointment:
                 task.appointment = Appointment.objects.create(
@@ -524,6 +534,7 @@ def tasks_update(request):
         task.save()
         return JsonResponse({}, status=200)
     return JsonResponse({}, status=405)
+
 
 @login_required(login_url="/calapp/accounts/login")
 def tasks_delete(request):
