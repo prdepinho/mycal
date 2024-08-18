@@ -15,19 +15,28 @@
 </body>
 
 <script>
-  var running = false;
+  var running = "{{timer.running}}" == "True";
+  var addition = 0;
 
   window.onload = function() {
     console.log('onload');
-    var count = {{timer.count}};
-    document.getElementById('timercount').innerHTML = count + ' ';
 
-    readable_counter(count);
+    if (running) {
+      console.log('running');
+      save_and_refresh_timer();
+    }
+    else {
+      var count = {{timer.count}};
+      document.getElementById('timercount').value = count;
+      readable_counter(count);
+    }
+
 
     setInterval(function() {
       if (running) {
+        var count = parseInt(document.getElementById('timercount').value) | 0;
         count += 1;
-        document.getElementById('timercount').value = count + ' ';
+        document.getElementById('timercount').value = count;
         readable_counter(count);
         console.log('count: ' + count);
       }
@@ -43,7 +52,7 @@
       else {
         button.innerHTML = 'Start';
         running = false;
-        timer_save()
+        save_and_refresh_timer();
       }
     });
 
@@ -56,7 +65,6 @@
   window.onbeforeunload = function() {
     console.log("before unload");
     if (running) {
-      running = false;
       timer_save();
     }
   }
@@ -113,6 +121,30 @@
         console.log('update successful');
       }
     });
+  }
+
+  async function save_and_refresh_timer() {
+    var name = document.getElementById('timername').value;
+    await send('PUT', "/calapp/timer/", {
+      "id": {{timer.id}},
+      "name": name,
+      "running": running,
+    }, function(request) {
+      if (request.status == 204) {
+        console.log('update successful');
+      }
+    });
+    await send('GET', "/calapp/timer/?id={{timer.id}}", {}, 
+      function(request) {
+        if (request.status == 200) {
+          var response = JSON.parse(request.responseText);
+          document.getElementById('timercount').value = response.count;
+          var count = parseInt(document.getElementById('timercount').value) | 0;
+          readable_counter(count);
+          console.log('count refreshed: ' + count);
+        }
+      }
+    );
   }
 
 </script>

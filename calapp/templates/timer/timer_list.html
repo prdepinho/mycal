@@ -84,10 +84,16 @@
       updated = `${year}-${month}-${day} ${hour}:${minute}:${second}`
     }
 
+    var str = "";
+    if (timer.running) {
+      str = `RUNNING - `
+    }
+    str += `${timer.name}: <b>${readable}</b>, updated: ${updated}`
+
     tag.innerHTML = `
       <div id="timer_div_${timer.id}" class="timer_div">
         <p id="timer_"+${timer.id}>
-          ${timer.name}: <b>${readable}</b>, updated: ${updated}
+          ${str}
         </p>
         <p>
           <button class="detail" onclick="timer_detail(${timer.id})">Detail</button>
