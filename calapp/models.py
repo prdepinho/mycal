@@ -44,4 +44,5 @@ class Task(models.Model):
     done = models.BooleanField(default=False)
     parent = models.ForeignKey('self', null=True, on_delete=models.CASCADE)
     appointment = models.ForeignKey(Appointment, null=True, on_delete=models.CASCADE)
+    timer = models.ForeignKey(Timer, null=True, on_delete=models.CASCADE)
 

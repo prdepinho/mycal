@@ -49,6 +49,7 @@
           document.getElementById("priority_input_"+task.id).value = task.priority;
           document.getElementById("deadline_input_"+task.id).value = task.deadline;
           document.getElementById("done_input_"+task.id).checked = task.done;
+          document.getElementById("timer_"+task.id).value = task.timer_id | 0;
 
           send("GET", `/calapp/tasks_get_children?parent_id=${task.id}`, 
             {},
@@ -112,6 +113,7 @@
                     <input class="priority_input" type="number" id="priority_input_${id}">
                     <label>Deadline:</label>
                     <input class="deadline_input" type="date" id="deadline_input_${id}">
+                    <input hidden type="number" id="timer_${id}">
                   </td>
                 </tr>
                 <tr>
@@ -119,6 +121,7 @@
                   <td class="buttons">
                     <button class="update_button" id="update_button_${id}" disabled onclick="update_task(${id})">Save</button>
                     <button class="new_child_button" onclick="new_child_task(${id})">New Child</button>
+                    <button class="open_timer_button" onclick="open_timer(${id})">Timer</button>
                     <button class="delete_button" onclick="delete_task(${id})">Delete</button>
                   </td>
                 </tr>
@@ -199,15 +202,17 @@
     var priority = document.getElementById("priority_input_" + id);
     var deadline = document.getElementById("deadline_input_" + id);
     var done =     document.getElementById("done_input_" + id);
+    var timer_id = document.getElementById("timer_" + id);
     var data = {
       "id":       id,
       "title":    title.value,
       "priority": Number(priority.value),
       "deadline": deadline ? deadline.value : null,
       "done":     done.checked,
+      "timer":    Number(timer_id.value),
     };
     console.log(data);
-    send("PUT", "/calapp/tasks_update", data, function(request) {
+    return send("PUT", "/calapp/tasks_update", data, function(request) {
       if (request.status == 200) {
         console.log('success');
         document.getElementById("update_button_"+id).disabled = true;
@@ -233,6 +238,34 @@
       parent.insertBefore(new_child_task_tag(response.id), parent.firstChild);
       set_new_child_callbacks(response.id);
     });
+  }
+
+  function open_timer(id) {
+    var timer_id = document.getElementById("timer_"+id).value;
+    if (timer_id == 0) {
+      // create, update task, and set timer_id
+      return send("POST", '/calapp/timer/')
+        .then(request => {
+          if (request.status == 201) {
+            var response = JSON.parse(request.responseText);
+            timer_id = response.id;
+            console.log('creation successful: ' + timer_id);
+            document.getElementById("timer_"+id).value = timer_id;
+
+            return update_task(id);
+          }
+        }).then(request => {
+          console.log('detail: ' + timer_id);
+          document.location.href = "/calapp/timer/page/?id=" + timer_id;
+        });
+    }
+    else {
+      update_task(id)
+        .then(request => {
+          console.log('detail: ' + timer_id);
+          document.location.href = "/calapp/timer/page/?id=" + timer_id;
+        });
+    }
   }
 
 </script>

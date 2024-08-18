@@ -510,6 +510,10 @@ def tasks_update(request):
             task.priority = data['priority']
         if data['done'] is not None:
             task.done = data['done']
+        if data['timer'] not in [None, 0]:
+            task.timer = Timer.objects.get(id=data['timer'])
+            task.timer.name = task.title
+            task.timer.save()
 
         if task.parent is None:
             if task.done:
