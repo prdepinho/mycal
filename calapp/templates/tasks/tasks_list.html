@@ -209,7 +209,7 @@
       "priority": Number(priority.value),
       "deadline": deadline ? deadline.value : null,
       "done":     done.checked,
-      "timer":    Number(timer_id.value),
+      "timer":    timer_id ? Number(timer_id.value) : null,
     };
     console.log(data);
     return send("PUT", "/calapp/tasks_update", data, function(request) {
